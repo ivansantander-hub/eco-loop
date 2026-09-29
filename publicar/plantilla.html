@@ -155,7 +155,7 @@
 </nav>
 <div class="wrap">
   <header>
-    <div class="eyebrow" id="fecha">Experimento · Ollama local</div>
+    <div class="eyebrow" id="fecha">septiembre 2026</div>
     <div>
       <h1 class="titulo">eco loop</h1>
       <div class="reflejo" aria-hidden="true">eco loop</div>
@@ -288,7 +288,7 @@ function ficha() {
     ...(coste ? [["Coste en OpenRouter", "$" + coste.toFixed(4)]] : []),
   ];
   $("#ficha").innerHTML = filas.map(([k, v]) => `<div><dt class="eyebrow">${k}</dt><dd>${esc(v)}</dd></div>`).join("");
-  $("#fecha").textContent = `Experimento · ${TEXTOS.fecha}`;
+  $("#fecha").textContent = TEXTOS.fecha;
 }
 
 function grafica(analisis) {

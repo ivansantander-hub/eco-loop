@@ -1,6 +1,6 @@
 {
   "orden": ["2026-09-27_023832_puro", "2026-09-27_024004_personalidad", "2026-09-27_024454_puro"],
-  "fecha": "septiembre de 2026",
+  "fecha": "septiembre 2026",
   "ensayos": {
     "2026-09-27_023832_puro": {
       "titulo": "Dos asistentes esperando instrucciones",
@@ -88,5 +88,5 @@
     "Son pocas conversaciones, no una estadística. Con otra temperatura u otra semilla pueden salir cosas distintas.",
     "El texto de las IAs aparece tal cual salió, sin editar."
   ],
-  "pie": "eco loop · septiembre de 2026 · Cada turno guarda su configuración, tokens y tiempo en el JSON del experimento."
+  "pie": "eco loop · septiembre 2026 · Cada turno guarda su configuración, tokens y tiempo en el JSON del experimento."
 }
