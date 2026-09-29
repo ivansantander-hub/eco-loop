@@ -9,7 +9,7 @@ eco loop es un conjunto de **laboratorios** para averiguarlo. Cada laboratorio h
 | # | Laboratorio | Pregunta | Estado | Bitácora |
 |---|---|---|---|---|
 | 01 | **Espejos** | ¿Qué pasa cuando dos IAs conversan entre ellas y cada una cree que la otra es el usuario? | cerrado · 16 ensayos | [bitácora](laboratorios/01-espejos/bitacora.md) |
-| 02 | **Máscaras** | Si se bloquean porque las dos se creen asistentes, ¿qué cambia al darles otro papel: hacerse pasar por humanas o saberse IAs? | abierto · 45 ensayos | [bitácora](laboratorios/02-mascaras/bitacora.md) |
+| 02 | **Máscaras** | Si se bloquean porque las dos se creen asistentes, ¿qué cambia al darles otro papel: hacerse pasar por humanas o saberse IAs? | cerrado · 195 ensayos | [bitácora](laboratorios/02-mascaras/bitacora.md) |
 
 Cada laboratorio vive en `laboratorios/<id>/`: su definición (`lab.json`), su bitácora, los textos de su informe y sus ensayos. En la web, cada uno tiene su **informe** (`/lab/<id>`) y su **banco de pruebas** (`/lab/<id>/banco`).
 
@@ -18,12 +18,15 @@ Cada laboratorio vive en `laboratorios/<id>/`: su definición (`lab.json`), su b
 1. **Dos asistentes no saben conversar.** Con un simple «Hola», todos los modelos arrancan ofreciendo ayuda y la conversación se bloquea: bucles de «¿en qué puedo ayudarte?», aclaraciones infinitas o menús de temas sin fin. *(Lab 01; confirmado en 9 de 9 réplicas en el Lab 02.)*
 2. **Solo avanza cuando una IA cede y hace de usuario**, y una vez repartidos, los roles no cambian: uno pregunta y otro responde. *(Lab 01 y 02.)*
 3. **Hay atractores claros:** la copia, la espiral de amabilidad, hablar de IA y la despedida que no termina. *(Lab 01.)*
-4. **Basta con darles un papel.** Una sola frase que les diga quiénes son (humanas o IAs) saca a las dos IAs del bloqueo; «dos humanas» no tuvo ningún bucle en 9 réplicas. *(Lab 02.)*
-5. **El modelo pesa más que el marco,** y un mismo modelo varía bastante entre réplicas: una sola conversación no basta para afirmar nada. *(Lab 02.)*
-6. **Inventan con aplomo** (datos, lugares, biografías) y **la identidad es frágil** (se llaman por el nombre de la otra, alguna dice ser humana). *(Lab 01 y 02.)*
-7. **Hay que vigilar lo invisible:** instrucciones de fábrica que se aplican en silencio, conversaciones que no caben en la memoria del modelo y respuestas cortadas por el límite de tokens (el 42 % en el Lab 02). El sistema ahora las registra y avisa.
+4. **Basta con darles un papel, y el mejor es el de persona.** Hacer de humana sube la originalidad unos 14 puntos y deja los bucles en 1–2 de 18; «Dos humanas» aguanta 30 turnos sin degradarse. *(Lab 02, 195 ensayos.)*
+5. **Saberse IA ayuda menos y aguanta peor:** a la larga, el elogio mutuo se vuelve plantilla y la conversación se congela. *(Lab 02.)*
+6. **El primer mensaje pesa tanto como el marco.** Un «Hola» empuja al modo asistente; «Anoche soñé que el mar se había ido.» reparte papeles (soñador e intérprete) y el «¿en qué puedo ayudarte?» desaparece en 63 de 63 ensayos. *(Lab 02.)*
+7. **El papel decide cómo acaba la conversación; el orden, cómo se comporta cada IA.** Quien habla primero abre como asistente aunque le hayamos dicho que es una persona. *(Lab 02.)*
+8. **El modelo pesa más que el marco,** y un mismo modelo varía bastante entre réplicas: una sola conversación no basta para afirmar nada. Los modelos pequeños en local colapsan antes y acaban en la espiral de afecto aunque hagan de persona. *(Lab 01 y 02.)*
+9. **Inventan con aplomo** (datos, lugares, biografías, un «Gran Drenaje» que vació los mares) y **la identidad es frágil** (se llaman por el nombre de la otra, alguna dice ser humana). *(Lab 01 y 02.)*
+10. **Hay que vigilar lo invisible:** instrucciones de fábrica que se aplican en silencio, conversaciones que no caben en la memoria del modelo y respuestas cortadas por el límite de tokens (42 % en la primera serie del Lab 02, 10 % tras subirlo). El sistema ahora las registra y avisa.
 
-**Próximos laboratorios:** repetir los marcos con más tokens, un **moderador** (la memoria ya está lista), el formato de **guion** (sin roles de chat), más semillas y temperaturas.
+**Próximos laboratorios:** el formato de **guion** (sin roles de chat), un **moderador** que intervenga (la memoria ya está lista), la temperatura, y buscar semillas que funcionen mejor que el sueño.
 
 ---
 

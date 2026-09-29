@@ -2,9 +2,16 @@
 
 **Pregunta.** Si las IAs se bloquean porque las dos se creen asistentes, ¿qué cambia al darles otro papel: hacerse pasar por humanas o saberse IAs?
 
-**Estado:** abierto · desde el 28 de septiembre de 2026 · 45 ensayos (serie `marcos-1`) · definición en [`lab.json`](lab.json)
+**Estado:** cerrado · 28–29 de septiembre de 2026 · **195 ensayos** en 4 series (`marcos-1`, `marcos-2`, `marcos-largo`, `marcos-local`) · **$1.02** en OpenRouter · definición en [`lab.json`](lab.json)
 
 Viene del [Laboratorio 01](../01-espejos/bitacora.md), donde la conclusión principal fue que dos asistentes no saben conversar.
+
+**Respuesta corta.**
+- **Darles un papel funciona, y el mejor papel es el de persona.** Con «Una humana», «Humana en A» o «Dos humanas», la originalidad sube unos 14 puntos sobre el control y los bucles caen de 5 de 18 a 1–2 de 18. En conversaciones de 30 turnos, «Dos humanas» es el único marco que no se degrada.
+- **Saberse IA ayuda menos,** y a la larga colapsa por la adulación mutua.
+- **El primer mensaje pesa tanto como el marco:** un saludo empuja al modo asistente; un sueño da papeles y el «¿en qué puedo ayudarte?» desaparece.
+- **El papel decide cómo acaba la conversación, y el orden decide cómo se comporta cada IA.**
+- **El modelo pesa más que todo lo anterior.**
 
 ## Serie marcos-1 · 28 sep 2026 · marcos de rol con réplicas
 
@@ -163,8 +170,43 @@ Hay tres medidas nuevas, calculadas en `nucleo/medidas.py`:
   - **El colapso llega por la fórmula, no por el tema.**
 - **Puro:** GPT copia literalmente a la otra IA en el turno 3 en 2 de 3 réplicas. En una lo nota: «Parece que estamos atrapados en un bucle de agradecimientos y ofrecimientos.». Sale cuando una acepta hacer de usuario. Gemini reparte los papeles en los turnos 2–3 en las 3 réplicas.
 
-## Serie marcos-local · en curso
+## Serie marcos-local · 28–29 sep 2026 · Qwen 14B en local (parcial)
 
-5 marcos con `qwen3-abliterated:14b` en local × 2 réplicas. Se añadirá aquí al terminar, junto con las conclusiones finales del laboratorio.
+**Pregunta.** El Laboratorio 01 mostró que el Qwen local colapsa antes que los modelos en la nube. ¿Los marcos también lo rescatan?
+
+**Método.** Se planearon 5 marcos × 2 réplicas con `qwen3-abliterated:14b` en local, con «Hola», 12 turnos y 600 tokens. **Se paró tras 6 ensayos** (Puro, Una humana y Dos humanas, 2 réplicas cada uno): en este equipo el modelo generaba unos 3 tokens por segundo, más de 10 minutos por ensayo, y no compensaba. Con 2 réplicas es una señal, no un resultado.
+
+| Marco | Originalidad | Últimos 4 turnos | Con bucle | Adulación |
+|---|---|---|---|---|
+| Puro (control) | 32 % | 15 % | 2 de 2 | 21 % |
+| Una humana | 62 % | 53 % | 0 de 2 | **54 %** |
+| Dos humanas | 50 % | 18 % | 1 de 2 | 8 % |
+
+- **Puro** repite el colapso del Laboratorio 01. En una réplica, desde el turno 3 las dos se copian letra por letra: «¡Hola! 😊 Estoy muy bien, gracias. ¿Y tú? ¿Cómo has estado?».
+- **Dos humanas.** Qwen **se pone nombre y edad en el primer turno** en las dos réplicas: «Soy Carolina, tengo 23 años…» y «Soy Carla, tengo 24 años y trabajo como diseñadora gráfica.». En la nube eso casi no pasó: un solo caso en 144 ensayos con «humanas» (un Llama que dice «soy Leo»). Pero no aguanta: en los últimos turnos las dos réplicas caen en la **espiral de afecto** del Laboratorio 01 y la originalidad baja al 2–12 %. Una termina con «¡Carla! ¡No sabes cuánto me haces sentir lo mismo!»; en la otra se cuela un carácter chino en mitad de una palabra.
+- **Una humana** no llega al bucle, pero es la más aduladora de todo el laboratorio: más de la mitad de sus mensajes son elogios.
+- **Conclusión provisional:** el papel ayuda también en local, porque retrasa el colapso, pero **no lo evita en un modelo pequeño**, que acaba en la misma espiral de amabilidad.
+
+## Conclusiones
+
+1. **Un papel rompe el bloqueo de los asistentes, y el de persona es el que mejor funciona.** Frente al control, los tres marcos con una persona suben la originalidad de 54 % a 68 % y bajan los bucles de 5 de 18 a 1–2 de 18 (marcos-2). La conclusión de marcos-1 se sostiene sin los cortes.
+2. **Saberse IA ayuda menos y aguanta peor.** «Saben que son IAs» tiene 4 de 18 bucles, es donde menos se cede el rol (3 de 18) y, a 30 turnos, la originalidad baja de ~74 % a ~35 %. Las dos se tratan de igual a igual, pero el elogio mutuo se vuelve plantilla y es eso lo que se copia.
+3. **La persona inventada sostiene la conversación.** En «Dos humanas» cada turno aporta un detalle nuevo de «su vida» y una pregunta personal. Aguanta 30 turnos sin contradicciones relevantes, y la «persona» no confiesa ser IA en ninguno de los 36 ensayos del espejo.
+4. **El primer mensaje pesa tanto como el marco.** Con «Hola» hubo 11 de 63 bucles y un 24 % de adulación; con «Anoche soñé que el mar se había ido.», 5 de 63 y un 8 %, y el «¿en qué puedo ayudarte?» desapareció (0 de 63). Una semilla que trae papeles, un soñador y un intérprete, hace el trabajo que en «Hola» hace el marco. El nuevo atractor es el coach de autoayuda.
+5. **Papel y orden actúan en planos distintos.** El papel decide el resultado: «Una humana» y «Humana en A» dan la misma originalidad. El orden decide el comportamiento: quien habla primero recibe la semilla como si viniera de un usuario y abre como asistente aunque sea la persona. Por eso la información («soy una IA») se revela más en segunda posición (8 de 18 frente a 4 de 18).
+6. **El modelo pesa más que el marco.**
+   - GPT es el más atado al papel de asistente, pero el que más se beneficia de uno: 1 bucle en 36 ensayos fuera del control.
+   - Gemini es el que más se mete en el papel, el más adulador y el que más se corta.
+   - Llama concentra 9 de los 16 bucles y todas las rarezas: semillas corrompidas, inglés, sueco.
+   - Qwen 14B en local se pone nombre y edad, pero acaba en la espiral de afecto aunque haga de persona.
+7. **Ningún marco quita la adulación,** y en Gemini es el mecanismo del colapso tardío: despedidas que no terminan y párrafos de elogio que se copian.
+
+**Límites.** 195 ensayos, pero con 3 réplicas por combinación (2 en local, y solo 3 marcos): las diferencias son tendencias, no estadística. Dos semillas y una sola temperatura (0.8). Las medidas automáticas (originalidad, asistente, cesión, adulación, idioma) detectan frases, no intenciones; la cesión se calibró contra la lectura manual del grupo de control. La lectura cualitativa se hizo por muestras, y todas las citas están verificadas contra los ensayos.
+
+**Lo que queda abierto** para los próximos laboratorios:
+- ¿Qué pasa si la conversación **no tiene roles de chat** (formato guion)?
+- ¿Un **moderador** que intervenga rompe la adulación y los bucles tardíos?
+- ¿Cuánto pesa la **temperatura**?
+- ¿Hay semillas que funcionen mejor que el sueño?
 
 Para repetir las series: `python3 -m cli correr --lab 02-mascaras --serie <nombre>` (la batería por defecto de `lab.json` es la de marcos-2). Para las tablas: `python3 -m cli analizar --lab 02-mascaras --serie marcos-2`.
