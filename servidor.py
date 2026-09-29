@@ -105,7 +105,7 @@ class Handler(SimpleHTTPRequestHandler):
             _cache_modelos.update(t=time.time(), datos=sorted(
                 ({"id": m["id"], "nombre": m.get("name", m["id"]),
                   "gratis": m["id"].endswith(":free") or all(float(v or 0) == 0 for v in (m.get("pricing") or {}).values())}
-                 for m in datos if "text" in (m.get("architecture") or {}).get("output_modalities", ["text"])),
+                 for m in datos if (m.get("architecture") or {}).get("output_modalities", ["text"]) == ["text"]),  # solo modelos de chat de texto
                 key=lambda m: m["nombre"].lower()))
         self._json({"activo": True, "modelos": _cache_modelos["datos"]})
 

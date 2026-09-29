@@ -18,3 +18,4 @@ publicar/Dos espejos.html
 
 # Claves locales (nunca al repo)
 .env
+.claude/worktrees/

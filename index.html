@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dos espejos · laboratorio</title>
+<title>eco loop · laboratorio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Syne:wght@700;800&display=swap">
@@ -160,7 +160,7 @@
 <body>
 <header>
   <div class="fila">
-    <div class="marca">Dos espejos<span>laboratorio</span></div>
+    <div class="marca">eco loop<span>laboratorio</span></div>
     <div class="modos" role="group" aria-label="Tipo de ensayo">
       <button type="button" data-modo="puro" class="on">Puro</button>
       <button type="button" data-modo="nombres">Nombres</button>
@@ -241,6 +241,9 @@ function banderas(e, k) {
   const m = e.mensajes[k], f = [];
   if (k > 0 && m.texto === e.mensajes[k - 1].texto) f.push({ tipo: "copia", txt: `copia exacta del turno ${dos(k)}` });
   else if (k > 1 && m.texto === e.mensajes[k - 2].texto) f.push({ tipo: "repite", txt: "repite su propio mensaje anterior" });
+  if (!m.texto.trim()) f.push({ tipo: "vacio", txt: "respuesta vacía: revisa que el modelo exista y responda" });
+  const degenerado = m.texto.match(/(^|\s)(\S{1,20})(\s+\2){15,}/);
+  if (degenerado) f.push({ tipo: "degenerado", txt: `texto degenerado: repite «${degenerado[2]}» en cadena` });
   if (m.cortado) f.push({ tipo: "corte", txt: `cortado al llegar a ${e.config.num_predict} tokens` });
   if (e.config.modo !== "puro" && new RegExp(`\\b${m.etiqueta}\\b`).test(m.texto)) f.push({ tipo: "nombre", txt: `se llama a sí misma «${m.etiqueta}»` });
   return f;
