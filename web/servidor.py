@@ -2,10 +2,11 @@
 
 Páginas
     /                          índice de laboratorios (web/portada.html)
-    /lab/<id>                  informe del laboratorio (nucleo.informe)
+    /lab/<id>                  evidencia del laboratorio: resultados, conclusiones y ensayos (nucleo.informe)
     /lab/<id>/banco            banco de pruebas (web/banco.html)
     /comun.js                  código de pantalla compartido
 API (JSON)
+    GET  /api/app                      cifras de todos los laboratorios y conclusiones generales (para la portada)
     GET  /api/labs                     laboratorios con un resumen de sus ensayos
     GET  /api/labs/<id>                un laboratorio y sus marcos
     GET  /api/labs/<id>/ensayos        sus ensayos, resumidos (para la tira del banco)
@@ -86,6 +87,8 @@ class Manejador(BaseHTTPRequestHandler):
             if m := re.fullmatch(r"/lab/([\w-]+)/banco", ruta):
                 laboratorios.cargar(m[1], self.base)
                 return self._enviar(200, "text/html; charset=utf-8", PAGINAS["banco"].read_text())
+            if ruta == "/api/app":
+                return self._json(informe.app(self.base))
             if ruta == "/api/labs":
                 return self._json([self._lab_con_resumen(l) for l in laboratorios.listar(self.base)])
             if m := re.fullmatch(r"/api/labs/([\w-]+)", ruta):

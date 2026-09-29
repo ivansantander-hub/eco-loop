@@ -5,7 +5,7 @@
 <style>
   :root {
     --paper: #ECEEF3; --paper-2: #E1E4EC; --ink: #14161D; --muted: #5B6172; --rule: #C6CBD7;
-    --a: #2346E0; --a-soft: #D5DCFA; --b: #A86C00; --b-soft: #F1E1BF;
+    --a: #2346E0; --a-soft: #D5DCFA; --b: #A86C00; --b-soft: #F1E1BF; --alerta: #C0392B;
     --display: "Syne", "Arial Black", sans-serif;
     --serif: "Newsreader", Georgia, "Times New Roman", serif;
     --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -14,13 +14,13 @@
     :root:not([data-theme="light"]) {
       color-scheme: dark;
       --paper: #0F1117; --paper-2: #171A23; --ink: #E6E8EF; --muted: #8B91A2; --rule: #2A2F3C;
-      --a: #8299FF; --a-soft: #1C2550; --b: #E6AE48; --b-soft: #3B2D10;
+      --a: #8299FF; --a-soft: #1C2550; --b: #E6AE48; --b-soft: #3B2D10; --alerta: #FF7A6B;
     }
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
     --paper: #0F1117; --paper-2: #171A23; --ink: #E6E8EF; --muted: #8B91A2; --rule: #2A2F3C;
-    --a: #8299FF; --a-soft: #1C2550; --b: #E6AE48; --b-soft: #3B2D10;
+    --a: #8299FF; --a-soft: #1C2550; --b: #E6AE48; --b-soft: #3B2D10; --alerta: #FF7A6B;
   }
 
   * { box-sizing: border-box; }
@@ -136,6 +136,62 @@
     .hueco { display: none; }
   }
 
+  /* ---------- Índice de la página ---------- */
+  .indice { display: flex; flex-wrap: wrap; gap: 6px 18px; font: 500 12.5px var(--mono); }
+  .indice a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--rule); padding-bottom: 2px; }
+  .indice a:hover { color: var(--ink); border-color: var(--ink); }
+  section[id] { scroll-margin-top: 24px; }
+  .intro { max-width: 62ch; color: var(--muted); }
+  .bloque { display: grid; gap: 20px; }
+
+  /* ---------- Resultados ---------- */
+  .medidas-def { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px 24px; font-size: 14.5px; color: var(--muted); }
+  .medidas-def b { display: flex; align-items: center; gap: 8px; color: var(--ink); font: 500 12px var(--mono); letter-spacing: .04em; }
+  .punto { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex: none; }
+  .marcos-res { display: grid; border-top: 2px solid var(--ink); }
+  .marco-res { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 12px 40px; padding-block: 24px; border-bottom: 1px solid var(--rule); }
+  @media (max-width: 760px) { .marco-res { grid-template-columns: 1fr; } }
+  .marco-res h3 { font: 800 24px/1.1 var(--display); letter-spacing: -.01em; margin: 0 0 6px; }
+  .marco-res .tag { font: 500 10.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: 999px; padding: 1px 7px; margin-left: 6px; vertical-align: middle; color: var(--muted); }
+  .marco-res p { font-size: 15px; color: var(--muted); }
+  .marco-res .n { font: 12px var(--mono); color: var(--muted); margin-top: 8px; }
+  .barras { display: grid; gap: 9px; align-content: center; }
+  .barra-m { display: grid; grid-template-columns: 170px minmax(0, 1fr) 92px; align-items: center; gap: 12px; font: 12px var(--mono); }
+  @media (max-width: 520px) { .barra-m { grid-template-columns: 1fr 80px; } .barra-m .pista { grid-column: 1 / -1; grid-row: 2; } }
+  .barra-m .etq { color: var(--muted); }
+  .pista { height: 12px; background: var(--paper-2); border-radius: 2px; position: relative; overflow: hidden; }
+  .pista i { position: absolute; inset: 0 auto 0 0; border-radius: 2px; }
+  .barra-m .val { text-align: right; font-variant-numeric: tabular-nums; }
+  .detalle summary, .bitacora summary, .filtro { cursor: pointer; font: 500 13px var(--mono); }
+  .detalle summary, .bitacora summary { color: var(--ink); padding-block: 10px; }
+  .tabla-scroll { overflow-x: auto; }
+  table.datos { border-collapse: collapse; width: 100%; font: 12.5px/1.4 var(--mono); font-variant-numeric: tabular-nums; }
+  table.datos th, table.datos td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  table.datos th { color: var(--muted); font-weight: 500; white-space: nowrap; }
+  table.datos td.num, table.datos th.num { text-align: right; }
+  table.datos tr.destacado td:first-child { box-shadow: inset 3px 0 0 var(--a); }
+  .si { color: var(--alerta); } .no { color: var(--muted); }
+  .filtro { background: var(--paper-2); color: var(--ink); border: 1px solid var(--rule); border-radius: 6px; padding: 6px 8px; }
+
+  /* ---------- Conclusiones y bitácora (Markdown) ---------- */
+  .prosa { max-width: 72ch; font-size: 18px; display: grid; gap: 14px; }
+  .prosa p, .prosa ul, .prosa ol, .prosa blockquote { margin: 0; }
+  .prosa ul, .prosa ol { padding-left: 1.3em; display: grid; gap: 8px; }
+  .prosa li.sub { margin-left: 1.2em; list-style-type: circle; }
+  .prosa .md-h { font: 800 22px/1.15 var(--display); margin-top: 18px; }
+  .prosa .md-h3, .prosa .md-h4 { font: 600 17px/1.3 var(--mono); margin-top: 8px; }
+  .prosa a { color: var(--a); }
+  .prosa code { font-family: var(--mono); font-size: .8em; background: var(--paper-2); padding: 1px 4px; border-radius: 3px; }
+  .prosa blockquote { border-left: 3px solid var(--b); padding: 4px 0 4px 16px; color: var(--muted); }
+  .prosa hr { border: 0; border-top: 1px solid var(--rule); width: 100%; }
+  .md-tabla { overflow-x: auto; }
+  .md-tabla table { border-collapse: collapse; font: 13px/1.45 var(--mono); min-width: 100%; }
+  .md-tabla th, .md-tabla td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  .md-tabla th { color: var(--muted); font-weight: 500; }
+  .conclu-grande { font-size: 20px; }
+  .bitacora { border-top: 1px solid var(--rule); padding-top: 8px; }
+  .bitacora[open] .prosa { margin-top: 12px; }
+
   /* ---------- Método ---------- */
   .metodo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 40px; border-top: 2px solid var(--ink); padding-top: 20px; }
   @media (max-width: 860px) { .metodo { grid-template-columns: 1fr; } }
@@ -150,7 +206,7 @@
   <a class="nav-marca" href="/" id="navMarca">eco loop</a>
   <span class="nav-links">
     <a href="/" id="navLabs" hidden>Laboratorios</a>
-    <a aria-current="page" id="navInforme">Informe</a>
+    <a aria-current="page" id="navInforme">Evidencia</a>
     <a id="navBanco" hidden>Banco de pruebas</a>
     <a href="https://github.com/ivansantander-hub/eco-loop">Código</a>
   </span>
@@ -164,22 +220,56 @@
     </div>
     <p class="lede" id="pregunta"></p>
     <dl class="ficha" id="ficha"></dl>
+    <nav class="indice" aria-label="En esta página">
+      <a href="#resultados">Resultados</a><a href="#conclusiones">Conclusiones</a>
+      <a href="#destacados">Ensayos destacados</a><a href="#todos">Todos los ensayos</a><a href="#metodo-s">Método</a>
+    </nav>
+  </header>
+
+  <section class="bloque" id="resultados" aria-labelledby="res-t">
+    <div class="eyebrow">Resultados</div>
+    <h2 id="res-t">Qué dicen los datos</h2>
+    <p class="intro" id="resIntro"></p>
+    <div class="medidas-def">
+      <div><b><i class="punto" style="background:var(--ink)"></i>Originalidad</b>% de palabras de cada mensaje que la otra IA no había dicho justo antes. Más es mejor.</div>
+      <div><b><i class="punto" style="background:var(--alerta)"></i>Réplicas con bucle</b>ensayos con alguna copia exacta o casi exacta (≥ 90 %) del mensaje anterior.</div>
+      <div><b><i class="punto" style="background:var(--a)"></i>Habla como asistente</b>% de mensajes con «¿en qué puedo ayudarte?» y fórmulas parecidas.</div>
+      <div><b><i class="punto" style="background:var(--b)"></i>Se dice IA</b>% de mensajes en los que se declara IA o modelo de lenguaje.</div>
+      <div><b><i class="punto" style="background:var(--muted)"></i>Respuestas cortadas</b>% de mensajes que llegaron al límite de tokens (distorsiona la conversación).</div>
+    </div>
+    <div class="marcos-res" id="marcosRes"></div>
+    <details class="detalle"><summary>Detalle por marco y modelo (media ± desviación entre réplicas)</summary><div class="tabla-scroll" id="detalleRes"></div></details>
+  </section>
+
+  <section class="bloque" id="conclusiones" aria-labelledby="con-t">
+    <div class="eyebrow">Conclusiones</div>
+    <h2 id="con-t">Lo que deja este laboratorio</h2>
+    <div class="prosa conclu-grande" id="conclu"></div>
+    <details class="bitacora"><summary>Leer la bitácora completa</summary><div class="prosa" id="bitacora"></div></details>
+  </section>
+
+  <section class="curva" id="destacados" aria-labelledby="curva-t">
+    <div class="eyebrow">Ensayos destacados</div>
+    <h2 id="curva-t">¿Cuánto dice cada turno que no dijo la otra?</h2>
+    <p class="intro">Las conversaciones que mejor muestran lo observado. La curva es la originalidad turno a turno: 0 % significa que la IA solo devuelve lo que recibió.</p>
     <div class="leyenda">
       <span><span class="muestra a">IA A</span> habla a la izquierda, <span class="muestra b">IA B</span> a la derecha.</span>
       <span>Cuando una IA repite una palabra del último mensaje de la otra, esa palabra se pinta <b>del color de la otra</b>. Así se ve quién está copiando a quién.</span>
     </div>
-  </header>
-
-  <section class="curva" aria-labelledby="curva-t">
-    <div class="eyebrow">La curva</div>
-    <h2 id="curva-t">¿Cuánto dice cada turno que no dijo la otra?</h2>
-    <p class="intro">Originalidad por turno: el porcentaje de palabras con contenido (sin artículos ni preposiciones) que no estaban en el mensaje inmediatamente anterior de la otra IA. 0 % significa que solo devuelve lo que recibió.</p>
     <div class="grafica" id="grafica"></div>
   </section>
 
   <div id="ensayos" style="display:grid;gap:112px"></div>
 
-  <section class="metodo" aria-labelledby="metodo-t">
+  <section class="bloque" id="todos" aria-labelledby="todos-t">
+    <div class="eyebrow">Todos los ensayos</div>
+    <h2 id="todos-t">La evidencia completa</h2>
+    <p class="intro" id="todosIntro"></p>
+    <label class="mono">Marco <select class="filtro" id="filtroMarco"><option value="">todos</option></select></label>
+    <div class="tabla-scroll" id="tablaTodos"></div>
+  </section>
+
+  <section class="metodo" id="metodo-s" aria-labelledby="metodo-t">
     <div style="display:grid;gap:12px;align-content:start">
       <div class="eyebrow">Método y límites</div>
       <h2 id="metodo-t">Cómo se hizo</h2>
@@ -192,7 +282,8 @@
 
 <!-- __COMUN__ -->
 <script>
-const DATOS = __DATOS__;     // ensayos elegidos; cada mensaje trae m.medidas (originalidad, copiadas, banderas)
+const DATOS = __DATOS__;     // ensayos destacados; cada mensaje trae m.medidas (originalidad, copiadas, banderas)
+const EVIDENCIA = __EVIDENCIA__;  // totales, resultados por marco y por marco × modelo, todos los ensayos, bitácora
 const TEXTOS = __TEXTOS__;   // textos.json del laboratorio + nombres de los marcos
 const LAB = __LAB__;         // lab.json
 const SERVIDO = __SERVIDO__; // true si lo sirve el servidor; la copia estática no tiene banco de pruebas
@@ -233,21 +324,86 @@ function analizar(e) {
 }
 
 function ficha() {
-  const todos = DATOS.flatMap(e => e.mensajes);
-  const ids = [...new Set(DATOS.flatMap(e => e.config.ias.map(i => i.modelo)))];
-  const modelos = ids.map(m => m.replace(/^or:/, "").replace(/^huihui_ai\//, "").split("/").pop());
-  const proveedores = [ids.some(m => !m.startsWith("or:")) && "Ollama, en local", ids.some(m => m.startsWith("or:")) && "OpenRouter"].filter(Boolean);
-  const coste = todos.reduce((s, m) => s + (m.costo || 0), 0);
+  const t = EVIDENCIA.totales;
+  const proveedores = [t.modelos.some(m => !m.startsWith("☁")) && "Ollama, en local", t.modelos.some(m => m.startsWith("☁")) && "OpenRouter"].filter(Boolean);
   const filas = [
-    ["Modelos", modelos.join(" · ")],
+    ["Ensayos", `${t.ensayos}` + (t.descartados ? ` (+${t.descartados} descartado${t.descartados > 1 ? "s" : ""})` : "")],
+    ["Mensajes", t.mensajes.toLocaleString("es")],
+    ["Modelos", t.modelos.map(m => m.replace("☁ ", "")).join(" · ")],
     ["Dónde corren", proveedores.join(" · ")],
-    ["Ensayos", `${DATOS.length}`],
-    ["Turnos", `${todos.length}`],
-    ["Tokens generados", todos.reduce((s, m) => s + (m.tokens || 0), 0).toLocaleString("es")],
-    ...(coste ? [["Coste en OpenRouter", "$" + coste.toFixed(4)]] : []),
+    ["Réplicas con bucle", `${t.bucle} %`],
+    ...(t.coste ? [["Coste en OpenRouter", "$" + t.coste.toFixed(3)]] : []),
   ];
   $("#ficha").innerHTML = filas.map(([k, v]) => `<div><dt class="eyebrow">${k}</dt><dd>${esc(v)}</dd></div>`).join("");
-  $("#fecha").textContent = `eco loop · laboratorio ${String(LAB.numero).padStart(2, "0")} · ${TEXTOS.fecha || ""}`;
+  $("#fecha").textContent = `eco loop · laboratorio ${String(LAB.numero).padStart(2, "0")} · ${LAB.estado === "abierto" ? "en curso" : "cerrado"} · ${TEXTOS.fecha || ""}`;
+}
+
+// ---------- Resultados ----------
+const pct = v => v == null ? "–" : `${Math.round(v)} %`;
+function barra(etq, valor, color, texto) {
+  return `<div class="barra-m"><span class="etq">${etq}</span>
+    <span class="pista" role="img" aria-label="${etq}: ${texto}"><i style="width:${Math.max(0, Math.min(100, valor ?? 0))}%;background:${color}"></i></span>
+    <span class="val">${texto}</span></div>`;
+}
+function resultados() {
+  const r = EVIDENCIA.por_marco;
+  if (!r.length) { $("#resultados").hidden = true; return; }
+  const series = EVIDENCIA.totales.series;
+  $("#resIntro").textContent = `${EVIDENCIA.totales.ensayos} ensayos agrupados por marco (la instrucción que recibe cada IA)`
+    + (series.length ? `, de la serie ${series.join(", ")}` : "") + ". Cada barra es la media de sus ensayos; los tres modelos juntos.";
+  $("#marcosRes").innerHTML = r.map(m => `
+    <article class="marco-res">
+      <div>
+        <h3>${esc(m.nombre)}${m.marco === "puro" ? '<span class="tag">control</span>' : ""}</h3>
+        <p>${esc(m.ayuda)}</p>
+        <div class="n">${m.ensayos} ensayo${m.ensayos > 1 ? "s" : ""} · ${m.turnos} mensajes${m.coste ? ` · $${m.coste.toFixed(3)}` : ""}</div>
+      </div>
+      <div class="barras">
+        ${barra("Originalidad", m.originalidad, "var(--ink)", pct(m.originalidad) + (m.originalidad_sd != null ? ` ±${Math.round(m.originalidad_sd)}` : ""))}
+        ${barra("Réplicas con bucle", m.bucle, "var(--alerta)", `${m.con_bucle} de ${m.ensayos}`)}
+        ${barra("Habla como asistente", m.asistente, "var(--a)", pct(m.asistente))}
+        ${barra("Se dice IA", m.se_dice_ia, "var(--b)", pct(m.se_dice_ia))}
+        ${barra("Respuestas cortadas", m.cortados, "var(--muted)", pct(m.cortados))}
+      </div>
+    </article>`).join("");
+  const fila = m => `<tr><td>${esc(m.nombre)}</td><td>${esc(m.modelos)}</td><td class="num">${m.ensayos}</td>
+    <td class="num">${pct(m.originalidad)}${m.originalidad_sd != null ? ` ±${Math.round(m.originalidad_sd)}` : ""}</td>
+    <td class="num">${m.con_bucle} de ${m.ensayos}</td><td class="num">${pct(m.asistente_ab[0])} / ${pct(m.asistente_ab[1])}</td>
+    <td class="num">${pct(m.se_dice_ia_ab[0])} / ${pct(m.se_dice_ia_ab[1])}</td><td class="num">${pct(m.cortados)}</td>
+    <td class="num">${m.coste ? "$" + m.coste.toFixed(4) : "—"}</td></tr>`;
+  $("#detalleRes").innerHTML = `<table class="datos"><thead><tr><th>Marco</th><th>Modelos</th><th class="num">Ensayos</th>
+    <th class="num">Originalidad</th><th class="num">Con bucle</th><th class="num">Asistente A / B</th><th class="num">Se dice IA A / B</th>
+    <th class="num">Cortadas</th><th class="num">Coste</th></tr></thead><tbody>${EVIDENCIA.por_marco_modelo.map(fila).join("")}</tbody></table>`;
+}
+
+// ---------- Conclusiones y bitácora ----------
+function conclusiones() {
+  $("#conclu").innerHTML = EVIDENCIA.conclusiones ? md(EVIDENCIA.conclusiones) : `<p class="intro">Este laboratorio todavía no tiene conclusiones.</p>`;
+  if (EVIDENCIA.bitacora) $("#bitacora").innerHTML = md(EVIDENCIA.bitacora.replace(/^# .*\n/, ""));
+  else $(".bitacora").hidden = true;
+}
+
+// ---------- Todos los ensayos ----------
+function todos() {
+  const es = EVIDENCIA.ensayos;
+  $("#todosIntro").textContent = `${es.length} ensayos. Los marcados con una línea azul son los destacados de arriba. `
+    + "«Bucle» indica copias exactas y casi exactas; el texto completo de cada uno está en su archivo del laboratorio.";
+  const marcos = [...new Map(es.map(e => [e.marco, e.nombre_marco])).entries()];
+  $("#filtroMarco").innerHTML += marcos.map(([k, n]) => `<option value="${esc(k)}">${esc(n)}</option>`).join("");
+  const pintar = () => {
+    const f = $("#filtroMarco").value;
+    $("#tablaTodos").innerHTML = `<table class="datos"><thead><tr><th>Ensayo</th><th>Marco</th><th>Modelos</th><th>Primer mensaje</th>
+      <th class="num">Mensajes</th><th class="num">Originalidad</th><th>Bucle</th><th class="num">Cortadas</th><th class="num">Coste</th></tr></thead><tbody>`
+      + es.filter(e => !f || e.marco === f).map(e => `<tr class="${e.destacado ? "destacado" : ""}">
+        <td>${esc(e.id.replace(/^(\d{4})-(\d\d)-(\d\d)_(\d\d)(\d\d)\d\d_?/, "$3/$2 $4:$5 "))}${e.replica ? ` · r${e.replica}` : ""}</td>
+        <td>${esc(e.nombre_marco)}${e.de_fabrica ? " ⚠" : ""}</td><td>${esc(e.modelos)}</td><td>«${esc(e.semilla.slice(0, 40))}»</td>
+        <td class="num">${e.turnos}</td><td class="num">${pct(e.originalidad)}</td>
+        <td class="${e.bucle ? "si" : "no"}">${e.bucle ? `sí (${e.copias} + ${e.casi_copias})` : "no"}</td>
+        <td class="num">${e.cortados}</td><td class="num">${e.coste ? "$" + e.coste.toFixed(4) : "—"}</td></tr>`).join("")
+      + "</tbody></table>";
+  };
+  $("#filtroMarco").onchange = pintar;
+  pintar();
 }
 
 function grafica(analisis) {
@@ -374,8 +530,11 @@ function ensayo(e, a, k) {
 const ANALISIS = DATOS.map(analizar);
 cabecera();
 ficha();
+resultados();
+conclusiones();
+todos();
 if (DATOS.length) grafica(ANALISIS);
-else $("#grafica").innerHTML = `<p class="intro">Todavía no hay ensayos en este laboratorio.</p>`;
+else $("#grafica").innerHTML = `<p class="intro">Todavía no hay ensayos destacados en este laboratorio.</p>`;
 DATOS.forEach((e, k) => $("#ensayos").appendChild(ensayo(e, ANALISIS[k], k)));
 $("#metodo").innerHTML = TEXTOS.metodo.map(x => `<li>${x}</li>`).join("");
 $("#pie").innerHTML = TEXTOS.pie;

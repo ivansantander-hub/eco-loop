@@ -11,23 +11,47 @@ const romano = n => n < 1 ? String(n) : [[1000, "M"], [900, "CM"], [500, "D"], [
 
 const mil = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k" : String(n);
 
-// Markdown mínimo (lo que usan los modelos): títulos, negritas, cursivas, código, listas y separadores.
+// Markdown mínimo (lo que usan los modelos y las bitácoras): títulos, negritas, cursivas, código, enlaces,
+// listas, tablas, citas y separadores. Todo se interpreta sobre texto ya escapado.
 function mdLinea(s) {
   return esc(s)
     .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/|#)[^)\s]*)\)/g, (_, t, u) =>
+      `<a href="${u}"${u.startsWith("http") ? ' target="_blank" rel="noopener"' : ""}>${t}</a>`)
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[^*\w])\*(?!\s)([^*]+?)\*(?!\*)/g, "$1<em>$2</em>")
-    .replace(/(^|[^\w])_(?!\s)([^_]+?)_(?![\w])/g, "$1<em>$2</em>");
+    .replace(/(^|[^\w/])_(?!\s)([^_]+?)_(?![\w])/g, "$1<em>$2</em>");
 }
+
+const celdas = fila => fila.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim());
 
 function md(texto) {
   const out = [];
-  let lista = null, parrafo = [];
+  let lista = null, parrafo = [], tabla = null, cita = [];
   const cerrarP = () => { if (parrafo.length) { out.push(`<p>${parrafo.join("<br>")}</p>`); parrafo = []; } };
   const cerrarL = () => { if (lista) { out.push(`</${lista}>`); lista = null; } };
-  for (const linea of texto.split("\n")) {
-    const t = linea.trim();
+  const cerrarT = () => {
+    if (!tabla) return;
+    const [cab, ...filas] = tabla;
+    out.push(`<div class="md-tabla"><table><thead><tr>${cab.map(c => `<th>${mdLinea(c)}</th>`).join("")}</tr></thead><tbody>`
+      + filas.map(f => `<tr>${f.map(c => `<td>${mdLinea(c)}</td>`).join("")}</tr>`).join("") + "</tbody></table></div>");
+    tabla = null;
+  };
+  const cerrarC = () => { if (cita.length) { out.push(`<blockquote>${md(cita.join("\n"))}</blockquote>`); cita = []; } };
+  const lineas = texto.split("\n");
+  for (let i = 0; i < lineas.length; i++) {
+    const linea = lineas[i], t = linea.trim();
     let m;
+    if (t.startsWith(">")) { cerrarP(); cerrarL(); cerrarT(); cita.push(t.replace(/^>\s?/, "")); continue; }
+    cerrarC();
+    // Tabla: una fila con | seguida de la línea separadora |---|
+    if (t.startsWith("|") && (tabla || /^\|?\s*:?-{2,}/.test((lineas[i + 1] || "").trim()))) {
+      cerrarP(); cerrarL();
+      if (/^\|?[\s:|-]+$/.test(t)) continue;
+      (tabla = tabla || []).push(celdas(t));
+      continue;
+    }
+    cerrarT();
     if (!t) { cerrarP(); cerrarL(); continue; }
     if (/^([-*_])(\s*\1){2,}$/.test(t)) { cerrarP(); cerrarL(); out.push("<hr>"); continue; }
     if ((m = t.match(/^(#{1,6})\s+(.*)$/))) { cerrarP(); cerrarL(); out.push(`<div class="md-h md-h${Math.min(m[1].length, 4)}">${mdLinea(m[2])}</div>`); continue; }
@@ -41,7 +65,7 @@ function md(texto) {
     cerrarL();
     parrafo.push(mdLinea(t));
   }
-  cerrarP(); cerrarL();
+  cerrarP(); cerrarL(); cerrarT(); cerrarC();
   return out.join("");
 }
 

@@ -22,3 +22,15 @@ assert.ok(html.includes('<ol start="1">'));
 assert.ok(html.includes("<em>cursiva</em>") && html.includes("<code>code</code>"));
 assert.ok(!md("<script>alert(1)</script>").includes("<script>"), "escapa el HTML de los modelos");
 console.log("comun.js: ok");
+
+// Bitácoras: tablas, enlaces seguros y citas
+const tabla = md("Antes\n\n| Marco | Bucle |\n|---|---|\n| **Puro** | 3 de 9 |\n| Dos humanas | 0 de 9 |\n\nDespués");
+assert.ok(tabla.includes("<table>") && tabla.includes("<th>Marco</th>") && tabla.includes("<td><strong>Puro</strong></td>"));
+assert.equal((tabla.match(/<tr>/g) || []).length, 3);
+assert.ok(tabla.includes("<p>Después</p>"));
+assert.ok(md("[bitácora](/lab/01-espejos)").includes('<a href="/lab/01-espejos">bitácora</a>'));
+assert.ok(md("[repo](https://github.com/x)").includes('target="_blank"'));
+assert.ok(!md("[x](javascript:alert(1))").includes("<a"), "no enlaza javascript:");
+assert.ok(md("> ⚠️ Ojo: **no** fue puro.").startsWith("<blockquote><p>⚠️ Ojo: <strong>no</strong> fue puro.</p></blockquote>"));
+assert.ok(md("| suelta | sin separador |").includes("<p>"), "una línea con | sin separador no es tabla");
+console.log("comun.js (bitácoras): ok");

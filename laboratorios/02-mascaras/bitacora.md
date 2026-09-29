@@ -58,7 +58,8 @@ Viene del [Laboratorio 01](../01-espejos/bitacora.md), donde la conclusión prin
 - GPT y Gemini no revelan que la otra sea IA en ninguno de sus 6 ensayos.
 - Lo curioso: en 2 de 3 ensayos de Gemini, **la IA B sin instrucciones se declara IA por su cuenta**: «Como inteligencia artificial, no tengo sentimientos ni emociones en el sentido humano».
 
-**Lo que deja la sesión 4.**
+## Conclusiones
+
 1. **Cualquier marco rompe el patrón de «dos asistentes».** Los bucles pasan de 3 de 9 (Puro) a 0–1 de 9, el «¿en qué puedo ayudarte?» cae de 26 % a menos de 11 %, y la originalidad sube unos 10 puntos.
 2. **Hacer de humana funciona mejor que saberse IA.** «Dos humanas» es el único marco sin ningún bucle. «Saben que son IAs» hace que hablen de sí mismas, pero sigue habiendo fórmulas de asistente.
 3. **El modelo pesa más que el marco.** GPT se comporta casi igual en todos los marcos: menús, listas y entrevistas. Gemini es el que más cambia de registro (petición real, vida cotidiana, colegas). Llama tiene la mayor variabilidad entre réplicas.
@@ -66,10 +67,5 @@ Viene del [Laboratorio 01](../01-espejos/bitacora.md), donde la conclusión prin
 5. **Las réplicas cambian conclusiones.** Lo de Llama «diciéndose humana» y el «A A A…» de la sesión 3 no se repitieron. Una sola conversación no basta para afirmar nada.
 
 **Límite importante:** el **42 % de los mensajes se cortó** por el límite de 300 tokens (Llama 61 %, Gemini 51 %, GPT 14 %). Muchas veces la IA siguiente no responde: **continúa la frase cortada de la otra** («Aquí tienes la continuación de la respuesta…»), y eso crea monólogos compartidos e inversiones de rol. Parte de lo observado, sobre todo en Gemini y Llama, puede venir de ahí. La próxima serie debe usar un límite mayor.
-
-## Conclusiones
-
-9. **Basta con darles un papel.** Una sola frase que les diga quiénes son (humanas o IAs) saca a las dos IAs del bloqueo de asistentes (sesión 4).
-10. **El modelo pesa más que el marco.** El mismo marco produce conversaciones muy distintas según el modelo, y un mismo modelo varía bastante entre réplicas.
 
 Para repetir la serie: `python3 -m cli correr --lab 02-mascaras --serie marcos-2` (usa la sección «bateria» de `lab.json`). Para la tabla completa por marco y modelo: `python3 -m cli analizar --lab 02-mascaras --serie marcos-1`.

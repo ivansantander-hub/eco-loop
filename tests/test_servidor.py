@@ -49,6 +49,14 @@ class Servidor(ConLaboratorio):
         _, _, html = self.pedir("GET", f"/lab/{LAB}")
         self.assertIn('<script src="/comun.js"></script>', html)
         self.assertIn("const SERVIDO = true", html)
+        self.assertIn("const EVIDENCIA = {", html)
+        for seccion in ['id="resultados"', 'id="conclusiones"', 'id="destacados"', 'id="todos"']:
+            self.assertIn(seccion, html)
+
+    def test_api_app(self):
+        estado, app = self.json("GET", "/api/app")
+        self.assertEqual((estado, app["totales"]["laboratorios"], app["laboratorios"][0]["id"]), (200, 1, LAB))
+        self.assertIn("conclusiones", app)
 
     def test_solo_rutas_conocidas(self):
         for ruta in ["/.env", "/.git/config", "/servidor.py", "/nucleo/config.py", "/laboratorios/marcos.json", "/lab/99-nada", "/api/ensayos/../../x"]:
