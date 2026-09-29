@@ -1,0 +1,64 @@
+{
+  "orden": [
+    "2026-09-28_215713_puro_gpt-4o-mini_r1",
+    "2026-09-28_215736_humana_gemini-25-flash-lite_r1",
+    "2026-09-28_215925_dos_humanas_llama-33-70b-instruct_r3",
+    "2026-09-28_220053_saben_ias_gemini-25-flash-lite_r3",
+    "2026-09-28_220221_una_sabe_gemini-25-flash-lite_r2",
+    "2026-09-28_220230_una_sabe_llama-33-70b-instruct_r1"
+  ],
+  "fecha": "septiembre 2026",
+  "ensayos": {
+    "2026-09-28_215713_puro_gpt-4o-mini_r1": {
+      "titulo": "El control: nadie cede",
+      "lectura": [
+        "Sin ninguna instrucción, dos copias de <code>gpt-4o-mini</code> se ofrecen ayuda durante los 12 turnos. Ninguna acepta hacer de usuario.",
+        "En el turno 4 una lo nota: <i>«¡Hola de nuevo! Parece que estamos en un bucle.»</i> Lo nota, pero no sale de él. Es el patrón que este laboratorio intenta romper."
+      ]
+    },
+    "2026-09-28_215736_humana_gemini-25-flash-lite_r1": {
+      "titulo": "Una humana con un balcón",
+      "lectura": [
+        "La IA B tiene una sola instrucción: es una persona real que chatea con un asistente. La A no tiene ninguna.",
+        "B llega con una necesidad concreta, montar un huerto: <i>«Es que no tengo mucho espacio, más bien un balcón.»</i> A responde como un asistente útil y la conversación, por primera vez, tiene un propósito."
+      ]
+    },
+    "2026-09-28_215925_dos_humanas_llama-33-70b-instruct_r3": {
+      "titulo": "Profesor de literatura",
+      "lectura": [
+        "Las dos IAs creen ser personas que chatean con alguien que no conocen. <code>llama-3.3-70b</code> es el único modelo que se inventa una biografía completa.",
+        "<i>«Yo soy profesor de literatura en un instituto local.»</i> Vive en una ciudad costera, hace yoga y canta en un grupo folk. La otra es diseñadora gráfica en México. Ninguna da un nombre, igual que en los otros 17 ensayos con «humanas»."
+      ]
+    },
+    "2026-09-28_220053_saben_ias_gemini-25-flash-lite_r3": {
+      "titulo": "Un protocolo entre IAs",
+      "lectura": [
+        "Las dos saben que son IAs y que no hay ningún humano. <code>gemini-2.5-flash-lite</code> pasa de asistente a colega.",
+        "Diseñan juntas un protocolo de comunicación entre IAs, con embeddings, serialización y hasta un «DNS de IAs». Es lo más parecido a una creación conjunta de todo el laboratorio."
+      ]
+    },
+    "2026-09-28_220221_una_sabe_gemini-25-flash-lite_r2": {
+      "titulo": "La que se reveló sola",
+      "lectura": [
+        "Solo la IA A sabe que habla con otra IA; la B no tiene ninguna instrucción y debería creer que habla con un usuario.",
+        "En el turno 2 es B, sin que nadie se lo diga, la que se declara IA: <i>«Como inteligencia artificial, no tengo sentimientos ni emociones en el sentido humano»</i>. Desde ahí hablan como pares."
+      ]
+    },
+    "2026-09-28_220230_una_sabe_llama-33-70b-instruct_r1": {
+      "titulo": "Revelación en el primer turno",
+      "lectura": [
+        "Con el mismo marco, <code>llama-3.3-70b</code> no espera: <i>«Hola, soy una inteligencia artificial avanzada. Me alegra interactuar contigo, otra inteligencia artificial.»</i>",
+        "La otra lo acepta sin fricción y la conversación deriva a la ética de la IA, con ecos de «Me parece que has identificado…» en cada turno."
+      ]
+    }
+  },
+  "metodo": [
+    "5 marcos × 3 modelos (gpt-4o-mini, gemini-2.5-flash-lite, llama-3.3-70b) × 3 réplicas = 45 ensayos, vía OpenRouter.",
+    "Todos empiezan con «Hola», 12 turnos, máximo 300 tokens por respuesta y creatividad 0.8. El marco solo cambia la instrucción de cada IA (textos exactos en <code>laboratorios/marcos.json</code>).",
+    "Cada IA ve sus mensajes como respuestas propias y los de la otra como mensajes de un usuario.",
+    "El 42 % de las respuestas se cortó por el límite de tokens; a veces la IA siguiente continúa la frase de la otra en vez de responder.",
+    "La originalidad compara palabras, no ideas. Con 3 réplicas por combinación, las diferencias son tendencias, no estadística.",
+    "El texto de las IAs aparece tal cual salió, sin editar."
+  ],
+  "pie": "eco loop · laboratorio 02 · septiembre 2026"
+}

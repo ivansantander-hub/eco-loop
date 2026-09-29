@@ -7,15 +7,19 @@ index-v*.html
 # Skill de terceros: se reinstala con `npx skills add ConardLi/garden-skills@web-design-engineer` (ver skills-lock.json)
 .agents/
 .claude/skills/
-
-# Conversaciones: solo se sube un ensayo de ejemplo; el resto queda en local
-experimentos/*
-!experimentos/2026-09-27_024454_puro.json
-!experimentos/2026-09-27_024454_puro.md
-
-# Página generada: se reconstruye con `python3 publicar/construir.py`
-publicar/eco-loop.html
+.claude/worktrees/
 
 # Claves locales (nunca al repo)
 .env
-.claude/worktrees/
+
+# Ensayos: se quedan en tu equipo, salvo uno de ejemplo por laboratorio
+laboratorios/*/ensayos/*
+!laboratorios/01-espejos/ensayos/2026-09-27_024454_puro.*
+!laboratorios/02-mascaras/ensayos/2026-09-28_215736_humana_gemini-25-flash-lite_r1.*
+
+# Informes exportados (python3 -m cli exportar)
+laboratorios/*/informe.html
+
+# Estructura antigua, anterior a laboratorios/ (se pasa con: python3 -m cli migrar)
+experimentos/
+publicar/

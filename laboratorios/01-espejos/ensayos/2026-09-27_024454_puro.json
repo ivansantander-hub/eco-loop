@@ -24,7 +24,12 @@
         "system_integrado": null,
         "system": null
       }
-    ]
+    ],
+    "marco": "puro",
+    "formato": "chat",
+    "memoria": {
+      "tipo": "completa"
+    }
   },
   "mensajes": [
     {
@@ -228,5 +233,7 @@
       "cortado": false
     }
   ],
-  "publicar": false
+  "publicar": false,
+  "laboratorio": "01-espejos",
+  "version_esquema": 2
 }

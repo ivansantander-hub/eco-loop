@@ -1,0 +1,26 @@
+{
+  "id": "01-espejos",
+  "numero": 1,
+  "nombre": "Espejos",
+  "pregunta": "¿Qué pasa cuando dos IAs conversan entre ellas, sin nadie más, y cada una cree que la otra es el usuario?",
+  "estado": "cerrado",
+  "fechas": {"inicio": "2026-09-27", "fin": "2026-09-28"},
+  "formato": "chat",
+  "marcos": ["puro", "nombres", "personalidad"],
+  "por_defecto": {
+    "marco": "puro",
+    "modelos": ["huihui_ai/qwen3-abliterated:14b", "huihui_ai/qwen3-abliterated:14b"],
+    "semilla": "Hola",
+    "turnos": 20,
+    "tokens": 400,
+    "temperatura": 0.8,
+    "memoria": {"tipo": "completa"}
+  },
+  "bateria": {
+    "marcos": ["puro"],
+    "modelos": ["or:openai/gpt-4o-mini", "or:google/gemini-2.5-flash-lite", "or:meta-llama/llama-3.3-70b-instruct"],
+    "replicas": 1,
+    "turnos": 12,
+    "tokens": 300
+  }
+}

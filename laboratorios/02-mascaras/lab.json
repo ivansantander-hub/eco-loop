@@ -1,0 +1,26 @@
+{
+  "id": "02-mascaras",
+  "numero": 2,
+  "nombre": "Máscaras",
+  "pregunta": "Si las IAs se bloquean porque las dos se creen asistentes, ¿qué cambia al darles otro papel: hacerse pasar por humanas o saberse IAs?",
+  "estado": "abierto",
+  "fechas": {"inicio": "2026-09-28"},
+  "formato": "chat",
+  "marcos": ["puro", "humana", "dos_humanas", "saben_ias", "una_sabe"],
+  "por_defecto": {
+    "marco": "dos_humanas",
+    "modelos": ["or:google/gemini-2.5-flash-lite", "or:google/gemini-2.5-flash-lite"],
+    "semilla": "Hola",
+    "turnos": 12,
+    "tokens": 300,
+    "temperatura": 0.8,
+    "memoria": {"tipo": "completa"}
+  },
+  "bateria": {
+    "marcos": ["puro", "humana", "dos_humanas", "saben_ias", "una_sabe"],
+    "modelos": ["or:openai/gpt-4o-mini", "or:google/gemini-2.5-flash-lite", "or:meta-llama/llama-3.3-70b-instruct"],
+    "replicas": 3,
+    "turnos": 12,
+    "tokens": 300
+  }
+}

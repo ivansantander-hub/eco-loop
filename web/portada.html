@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eco loop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Syne:wght@600;800&display=swap">
+<style>
+  :root {
+    --paper: #ECEEF3; --paper-2: #E1E4EC; --ink: #14161D; --muted: #5B6172; --rule: #C6CBD7;
+    --a: #2346E0; --a-soft: #D5DCFA; --b: #A86C00; --b-soft: #F1E1BF;
+    --display: "Syne", "Arial Black", sans-serif;
+    --serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { color-scheme: dark;
+      --paper: #0F1117; --paper-2: #171A23; --ink: #E6E8EF; --muted: #8B91A2; --rule: #2A2F3C;
+      --a: #8299FF; --a-soft: #1C2550; --b: #E6AE48; --b-soft: #3B2D10; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 18px/1.6 var(--serif); padding-inline: clamp(16px, 5vw, 64px); padding-block: 0 96px; }
+  .wrap { max-width: 1120px; margin-inline: auto; display: grid; gap: 72px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  a { color: inherit; }
+  .nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 18px; border-bottom: 1px solid var(--rule); }
+  .nav-marca { font: 800 18px/1 var(--display); letter-spacing: -.02em; text-decoration: none; }
+  .nav a.codigo { font: 500 12.5px var(--mono); color: var(--muted); text-decoration: none; }
+  .nav a.codigo:hover { color: var(--ink); }
+  header { padding-top: clamp(40px, 7vw, 96px); display: grid; gap: 24px; }
+  .titulo, .reflejo { font: 800 clamp(52px, 12.5vw, 168px)/.9 var(--display); letter-spacing: -.045em; white-space: nowrap; margin: 0; }
+  .reflejo { transform: scaleY(-1); margin-top: .02em; opacity: .16; user-select: none;
+    -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 70%); mask-image: linear-gradient(to top, #000 0%, transparent 70%); }
+  .lede { font-size: clamp(21px, 2.4vw, 27px); line-height: 1.45; max-width: 34ch; margin: 0; text-wrap: pretty; }
+  .labs { display: grid; gap: 0; border-top: 2px solid var(--ink); }
+  .lab { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; gap: 8px 32px; padding-block: 32px; border-bottom: 1px solid var(--rule); align-items: start; }
+  @media (max-width: 760px) { .lab { grid-template-columns: 1fr; } }
+  .num { font: 800 clamp(48px, 7vw, 88px)/.85 var(--display); letter-spacing: -.04em; }
+  .lab h2 { font: 800 clamp(28px, 4vw, 44px)/1 var(--display); letter-spacing: -.02em; margin: 0 0 10px; }
+  .lab p { margin: 0; max-width: 60ch; text-wrap: pretty; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 14px; font: 12px var(--mono); color: var(--muted); }
+  .estado { padding: 2px 9px; border-radius: 999px; border: 1px solid var(--rule); }
+  .estado.abierto { color: var(--a); border-color: var(--a); }
+  .acciones { display: flex; flex-direction: column; gap: 8px; min-width: 190px; }
+  .acciones a { font: 500 13px var(--mono); text-decoration: none; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--ink); text-align: center; }
+  .acciones a.principal { background: var(--ink); color: var(--paper); }
+  .acciones a:hover { opacity: .85; }
+  .acciones a:focus-visible, .nav a:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+  .vacio { color: var(--muted); padding-block: 32px; }
+  footer { color: var(--muted); font-size: 15px; }
+  footer code { font-family: var(--mono); font-size: .85em; }
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Secciones">
+  <a class="nav-marca" href="/">eco loop</a>
+  <a class="codigo" href="https://github.com/ivansantander-hub/eco-loop">Código</a>
+</nav>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Laboratorios de conversación entre IAs</div>
+    <div>
+      <h1 class="titulo">eco loop</h1>
+      <div class="reflejo" aria-hidden="true">eco loop</div>
+    </div>
+    <p class="lede">¿Qué pasa cuando dos IAs hablan entre ellas, sin nadie más en la conversación? Cada laboratorio hace una pregunta y la pone a prueba.</p>
+  </header>
+  <section aria-labelledby="labs-t">
+    <h2 class="eyebrow" id="labs-t" style="margin:0 0 16px">Laboratorios</h2>
+    <div class="labs" id="labs"><p class="vacio">Cargando…</p></div>
+  </section>
+  <footer>Cada laboratorio es una carpeta en <code>laboratorios/</code> con su <code>lab.json</code>, su bitácora y sus ensayos.</footer>
+</div>
+<script src="/comun.js"></script>
+<script>
+(async () => {
+  const cont = document.getElementById("labs");
+  try {
+    const labs = await (await fetch("/api/labs")).json();
+    if (!labs.length) { cont.innerHTML = `<p class="vacio">Todavía no hay laboratorios.</p>`; return; }
+    cont.innerHTML = labs.map(l => `
+      <article class="lab">
+        <div class="num" aria-hidden="true">${romano(l.numero)}</div>
+        <div>
+          <h2>${esc(l.nombre)}</h2>
+          <p>${esc(l.pregunta)}</p>
+          <div class="meta">
+            <span class="estado ${l.estado === "abierto" ? "abierto" : ""}">${l.estado === "abierto" ? "en curso" : "cerrado"}</span>
+            <span>Laboratorio ${String(l.numero).padStart(2, "0")}</span>
+            <span>${l.n_ensayos} ensayos · ${l.n_mensajes} mensajes</span>
+            ${l.coste ? `<span>$${l.coste.toFixed(3)} en OpenRouter</span>` : ""}
+          </div>
+        </div>
+        <div class="acciones">
+          <a class="principal" href="/lab/${encodeURIComponent(l.id)}">Ver informe</a>
+          <a href="/lab/${encodeURIComponent(l.id)}/banco">Banco de pruebas</a>
+        </div>
+      </article>`).join("");
+  } catch (err) {
+    cont.innerHTML = `<p class="vacio">No se pudo cargar la lista de laboratorios: ${esc(err.message)}</p>`;
+  }
+})();
+</script>
+</body>
+</html>

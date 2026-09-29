@@ -1,4 +1,4 @@
-<title>eco loop</title>
+<title>__TITULO__</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Syne:wght@600;800&display=swap">
@@ -40,7 +40,8 @@
   .nav-links a:hover { color: var(--ink); }
   .nav-links a[aria-current="page"] { background: var(--ink); color: var(--paper); }
   .nav-links a:focus-visible, .nav-marca:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
-  header { padding-top: clamp(40px, 7vw, 96px); display: grid; gap: 28px; }
+  header { padding-top: clamp(40px, 7vw, 96px); display: grid; gap: 28px; min-width: 0; }
+  header > div { min-width: 0; overflow: hidden; }
   .titulo, .reflejo { font: 800 clamp(52px, 12.5vw, 168px)/.9 var(--display); letter-spacing: -.045em; white-space: nowrap; }
   .titulo { margin: 0; }
   /* El reflejo se voltea sobre su propio centro para quedar justo debajo del título, como en el agua */
@@ -146,21 +147,22 @@
 </style>
 
 <nav class="nav" aria-label="Secciones">
-  <a class="nav-marca" href="./">eco loop</a>
+  <a class="nav-marca" href="/" id="navMarca">eco loop</a>
   <span class="nav-links">
-    <a href="./" aria-current="page">Informe</a>
-    <a href="/laboratorio" id="navLab" hidden>Laboratorio</a>
+    <a href="/" id="navLabs" hidden>Laboratorios</a>
+    <a aria-current="page" id="navInforme">Informe</a>
+    <a id="navBanco" hidden>Banco de pruebas</a>
     <a href="https://github.com/ivansantander-hub/eco-loop">Código</a>
   </span>
 </nav>
 <div class="wrap">
   <header>
-    <div class="eyebrow" id="fecha">septiembre 2026</div>
+    <div class="eyebrow" id="fecha">eco loop</div>
     <div>
-      <h1 class="titulo">eco loop</h1>
-      <div class="reflejo" aria-hidden="true">eco loop</div>
+      <h1 class="titulo" id="titulo">eco loop</h1>
+      <div class="reflejo" aria-hidden="true" id="reflejo">eco loop</div>
     </div>
-    <p class="lede">Puse a dos modelos de lenguaje a hablar entre ellos, muchas veces dos copias del <em>mismo</em>. Nadie más en la conversación. Esto es lo que se dijeron.</p>
+    <p class="lede" id="pregunta"></p>
     <dl class="ficha" id="ficha"></dl>
     <div class="leyenda">
       <span><span class="muestra a">IA A</span> habla a la izquierda, <span class="muestra b">IA B</span> a la derecha.</span>
@@ -188,91 +190,46 @@
   <footer id="pie"></footer>
 </div>
 
+<!-- __COMUN__ -->
 <script>
-const DATOS = __DATOS__;
-const TEXTOS = __TEXTOS__;
-const CON_LABORATORIO = __CON_LABORATORIO__;   // solo cuando lo sirve servidor.py; la copia estática no tiene laboratorio
-document.getElementById("navLab").hidden = !CON_LABORATORIO;
-
-const VACIAS = new Set(("a al algo algún alguna ante antes aquí así aun aunque cada como con contra cual cuando de del desde donde dos e el ella ellas ello ellos en entre era eres es esa esas ese eso esos esta está están estas este esto estos estoy fue ha han has hay he la las le les lo los más me mi mí mis muy nada ni no nos o os otra otro para pero poco por porque qué que quien se sea ser si sí sin sino sobre son soy su sus tal también te ti tan tu tú tus un una uno unos unas y ya yo the and you i to of").split(" "));
-const norm = w => w.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
-const contenido = t => t.split(/\s+/).map(norm).filter(w => w.length > 2 && !VACIAS.has(w));
-const aRomano = n => [[50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]]
-  .reduce((s, [v, r]) => { while (n >= v) { s += r; n -= v; } return s; }, "");
-const ROMANOS = Array.from({ length: 89 }, (_, i) => aRomano(i + 1));
+const DATOS = __DATOS__;     // ensayos elegidos; cada mensaje trae m.medidas (originalidad, copiadas, banderas)
+const TEXTOS = __TEXTOS__;   // textos.json del laboratorio + nombres de los marcos
+const LAB = __LAB__;         // lab.json
+const SERVIDO = __SERVIDO__; // true si lo sirve el servidor; la copia estática no tiene banco de pruebas
+const ROMANOS = Array.from({ length: 199 }, (_, i) => romano(i + 1));
 const $ = (s, el = document) => el.querySelector(s);
-const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const reducir = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const NOTAS = ["copia", "repite", "vacio", "degenerado", "nombre", "desborde"];  // alertas que se muestran en cada turno
 
-// Para cada mensaje: qué dijo la otra IA justo antes (la semilla cuenta para el primer turno de A).
+// El nombre del laboratorio ocupa una línea: si no cabe al tamaño máximo, se reduce hasta que quepa.
+function ajustarTitulo() {
+  const t = $("#titulo"), r = $("#reflejo"), ancho = t.parentElement.clientWidth;
+  t.style.fontSize = r.style.fontSize = "";
+  const natural = t.scrollWidth;
+  if (natural > ancho) {
+    const tam = parseFloat(getComputedStyle(t).fontSize) * ancho / natural * 0.98;
+    t.style.fontSize = r.style.fontSize = tam + "px";
+  }
+}
+
+function cabecera() {
+  document.title = `${LAB.nombre} · eco loop`;
+  $("#titulo").textContent = $("#reflejo").textContent = LAB.nombre;
+  ajustarTitulo();
+  addEventListener("resize", ajustarTitulo);
+  $("#pregunta").textContent = LAB.pregunta;
+  $("#navLabs").hidden = !SERVIDO;
+  $("#navInforme").href = SERVIDO ? `/lab/${LAB.id}` : "#";
+  $("#navBanco").hidden = !SERVIDO;
+  $("#navBanco").href = `/lab/${LAB.id}/banco`;
+}
+
+// Cada mensaje con sus medidas ya calculadas por el servidor.
 function analizar(e) {
-  return e.mensajes.map((m, k) => {
-    const previo = k === 0 ? e.config.semilla : e.mensajes[k - 1].texto;
-    const setPrevio = new Set(contenido(previo));
-    const propias = contenido(m.texto);
-    const nuevas = propias.filter(w => !setPrevio.has(w)).length;
-    const originalidad = propias.length ? Math.round(100 * nuevas / propias.length) : null;
-    const notas = [];
-    if (k > 0 && m.texto === e.mensajes[k - 1].texto) notas.push("copia exacta, letra por letra, del mensaje de la otra IA");
-    else if (k > 1 && m.texto === e.mensajes[k - 2].texto) notas.push("repite su propio mensaje anterior sin cambiar nada");
-    const otra = e.config.ias[1 - m.autor].etiqueta;
-    if (e.config.modo !== "puro" && new RegExp(`\\b${m.etiqueta}\\b`).test(m.texto))
-      notas.push(`se dirige a «${m.etiqueta}», que es su propio nombre; su interlocutora se llama ${otra}`);
-    return { ...m, previo, setPrevio, originalidad, notas };
-  });
-}
-
-// Markdown mínimo (lo que usan los modelos): títulos, negritas, cursivas, código, listas y separadores.
-function mdLinea(s) {
-  return esc(s)
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/(^|[^*\w])\*(?!\s)([^*]+?)\*(?!\*)/g, "$1<em>$2</em>")
-    .replace(/(^|[^\w])_(?!\s)([^_]+?)_(?![\w])/g, "$1<em>$2</em>");
-}
-function md(texto) {
-  const out = [];
-  let lista = null, parrafo = [];
-  const cerrarP = () => { if (parrafo.length) { out.push(`<p>${parrafo.join("<br>")}</p>`); parrafo = []; } };
-  const cerrarL = () => { if (lista) { out.push(`</${lista}>`); lista = null; } };
-  for (const linea of texto.split("\n")) {
-    const t = linea.trim();
-    let m;
-    if (!t) { cerrarP(); cerrarL(); continue; }
-    if (/^([-*_])(\s*\1){2,}$/.test(t)) { cerrarP(); cerrarL(); out.push("<hr>"); continue; }
-    if ((m = t.match(/^(#{1,6})\s+(.*)$/))) { cerrarP(); cerrarL(); out.push(`<div class="md-h md-h${Math.min(m[1].length, 4)}">${mdLinea(m[2])}</div>`); continue; }
-    if ((m = linea.match(/^(\s*)([-*+•]|\d+[.)])\s+(.*)$/))) {
-      cerrarP();
-      const tipo = /\d/.test(m[2]) ? "ol" : "ul";
-      if (lista !== tipo) { cerrarL(); out.push(tipo === "ol" ? `<ol start="${parseInt(m[2])}">` : "<ul>"); lista = tipo; }
-      out.push(`<li${m[1].length >= 2 ? ' class="sub"' : ""}>${mdLinea(m[3])}</li>`);
-      continue;
-    }
-    cerrarL();
-    parrafo.push(mdLinea(t));
-  }
-  cerrarP(); cerrarL();
-  return out.join("");
-}
-// Pinta el mensaje con formato; las palabras tomadas del último mensaje de la otra IA llevan el color de la otra.
-function pintarEn(el, texto, previo, autor) {
-  el.innerHTML = md(texto);
-  const set = new Set(contenido(previo)), cls = autor === 0 ? "w-b" : "w-a";
-  const copiada = p => { const w = norm(p); return w.length > 2 && !VACIAS.has(w) && set.has(w); };
-  const recorrido = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), textos = [];
-  while (recorrido.nextNode()) textos.push(recorrido.currentNode);
-  for (const nodo of textos) {
-    const partes = nodo.nodeValue.split(/(\s+)/);
-    if (!partes.some(copiada)) continue;
-    const frag = document.createDocumentFragment();
-    for (const p of partes) {
-      if (!copiada(p)) { frag.append(p); continue; }
-      const s = document.createElement("span");
-      s.className = cls; s.textContent = p;
-      frag.append(s);
-    }
-    nodo.replaceWith(frag);
-  }
+  return e.mensajes.map(m => ({
+    ...m, originalidad: m.medidas.originalidad, copiadas: new Set(m.medidas.copiadas),
+    notas: m.medidas.banderas.filter(b => NOTAS.includes(b.tipo)).map(b => b.texto),
+  }));
 }
 
 function ficha() {
@@ -290,7 +247,7 @@ function ficha() {
     ...(coste ? [["Coste en OpenRouter", "$" + coste.toFixed(4)]] : []),
   ];
   $("#ficha").innerHTML = filas.map(([k, v]) => `<div><dt class="eyebrow">${k}</dt><dd>${esc(v)}</dd></div>`).join("");
-  $("#fecha").textContent = TEXTOS.fecha;
+  $("#fecha").textContent = `eco loop · laboratorio ${String(LAB.numero).padStart(2, "0")} · ${TEXTOS.fecha || ""}`;
 }
 
 function grafica(analisis) {
@@ -343,7 +300,7 @@ function ensayo(e, a, k) {
         <div><dt>Modelo</dt><dd>${esc([...new Set(e.config.ias.map(i => i.modelo))].join(" · "))}</dd></div>
         ${sysFilas}
         <div><dt>Semilla</dt><dd>«${esc(e.config.semilla)}» → IA A</dd></div>
-        <div><dt>Ajustes</dt><dd>temperatura ${e.config.temperature} · máx. ${e.config.num_predict} tokens/turno · contexto ${e.config.num_ctx}</dd></div>
+        <div><dt>Ajustes</dt><dd>temperatura ${e.config.temperature} · máx. ${e.config.num_predict} tokens/turno · memoria ${esc((e.config.memoria || {}).tipo || "completa")}</dd></div>
         ${cortados ? `<div><dt>Cortes</dt><dd>${cortados} de ${e.mensajes.length} respuestas llegaron al límite de tokens y se cortaron</dd></div>` : ""}
       </dl>
     </div>
@@ -375,7 +332,7 @@ function ensayo(e, a, k) {
   semilla.innerHTML = `Semilla para ${esc(e.config.ias[0].etiqueta)}: <b>«${esc(e.config.semilla)}»</b>`;
   part.prepend(semilla);
 
-  const pintarTodo = () => { nodos.forEach(n => { n.div.style.display = ""; pintarEn(n.txt, n.m.texto, n.m.previo, n.m.autor); n.txt.classList.remove("cursor"); }); tira.forEach(t => t.classList.remove("off")); };
+  const pintarTodo = () => { nodos.forEach(n => { n.div.style.display = ""; pintarEn(n.txt, n.m.texto, n.m.copiadas, n.m.autor); n.txt.classList.remove("cursor"); }); tira.forEach(t => t.classList.remove("off")); };
   pintarTodo();
 
   let corriendo = false, cancelar = false;
@@ -400,7 +357,7 @@ function ensayo(e, a, k) {
       await esperar(500);
       for (let j = 0; j < n.trozos.length && !cancelar; j++) {
         if (!n.trozos[j].trim()) continue;
-        pintarEn(n.txt, n.trozos.slice(0, j + 1).join(""), n.m.previo, n.m.autor);
+        pintarEn(n.txt, n.trozos.slice(0, j + 1).join(""), n.m.copiadas, n.m.autor);
         await esperar(38);
         const r = n.div.querySelector(".voz").getBoundingClientRect();
         if (r.bottom > innerHeight - 40) window.scrollBy({ top: r.bottom - innerHeight + 120 });
@@ -415,8 +372,10 @@ function ensayo(e, a, k) {
 }
 
 const ANALISIS = DATOS.map(analizar);
+cabecera();
 ficha();
-grafica(ANALISIS);
+if (DATOS.length) grafica(ANALISIS);
+else $("#grafica").innerHTML = `<p class="intro">Todavía no hay ensayos en este laboratorio.</p>`;
 DATOS.forEach((e, k) => $("#ensayos").appendChild(ensayo(e, ANALISIS[k], k)));
 $("#metodo").innerHTML = TEXTOS.metodo.map(x => `<li>${x}</li>`).join("");
 $("#pie").innerHTML = TEXTOS.pie;

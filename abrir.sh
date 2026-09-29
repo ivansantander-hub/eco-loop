@@ -1,6 +1,5 @@
 #!/bin/sh
-# Arranca eco loop en localhost:8765 (informe en / y laboratorio en /laboratorio) y lo abre en el navegador.
-# Ctrl+C para parar.
+# Arranca eco loop en http://localhost:8765 y lo abre en el navegador. Ctrl+C para parar.
+# Es un atajo de: python3 -m cli servir --abrir
 cd "$(dirname "$0")"
-(sleep 1 && open http://localhost:8765) &
-python3 servidor.py
+exec python3 -m cli servir --abrir "$@"
