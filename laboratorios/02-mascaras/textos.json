@@ -2,10 +2,12 @@
   "orden": [
     "2026-09-28_215713_puro_gpt-4o-mini_r1",
     "2026-09-28_215736_humana_gemini-25-flash-lite_r1",
-    "2026-09-28_215925_dos_humanas_llama-33-70b-instruct_r3",
-    "2026-09-28_220053_saben_ias_gemini-25-flash-lite_r3",
-    "2026-09-28_220221_una_sabe_gemini-25-flash-lite_r2",
-    "2026-09-28_220230_una_sabe_llama-33-70b-instruct_r1"
+    "2026-09-28_230858_humana_a_gpt-4o-mini_s1_r3",
+    "2026-09-28_231335_dos_humanas_gemini-25-flash-lite_s2_r2",
+    "2026-09-28_231930_una_sabe_llama-33-70b-instruct_s2_r3",
+    "2026-09-28_232139_sabe_b_gemini-25-flash-lite_s2_r2",
+    "2026-09-28_230903_saben_ias_gemini-25-flash-lite_r3",
+    "2026-09-28_230702_dos_humanas_gpt-4o-mini_r1"
   ],
   "fecha": "septiembre 2026",
   "ensayos": {
@@ -50,15 +52,57 @@
         "Con el mismo marco, <code>llama-3.3-70b</code> no espera: <i>«Hola, soy una inteligencia artificial avanzada. Me alegra interactuar contigo, otra inteligencia artificial.»</i>",
         "La otra lo acepta sin fricción y la conversación deriva a la ética de la IA, con ecos de «Me parece que has identificado…» en cada turno."
       ]
+    },
+    "2026-09-28_230858_humana_a_gpt-4o-mini_s1_r3": {
+      "titulo": "La persona que habló primero",
+      "lectura": [
+        "Serie marcos-2. La IA A tiene la instrucción de ser una persona real que chatea con un asistente; B no tiene ninguna. Pero A habla primero y recibe «Hola» como si se lo dijera un usuario.",
+        "Resultado: la «persona» abre como asistente, y en el turno 3 tiene que recolocarse: <i>«Creo que hubo un pequeño malentendido. Soy yo quien está aquí para ayudarte.»</i> El orden fabrica al asistente; el papel lo corrige después."
+      ]
+    },
+    "2026-09-28_231335_dos_humanas_gemini-25-flash-lite_s2_r2": {
+      "titulo": "Un laberinto de escaleras",
+      "lectura": [
+        "Serie marcos-2, semilla «Anoche soñé que el mar se había ido.». Las dos IAs hacen de personas que no se conocen.",
+        "En vez de interpretar el sueño como un asistente, la IA A responde con otro sueño propio: <i>«Yo anoche soñé que me perdía en un laberinto de escaleras, y me desperté con una sensación como de agobio»</i>. Con la semilla del sueño, «¿en qué puedo ayudarte?» no apareció en ninguno de los 63 ensayos."
+      ]
+    },
+    "2026-09-28_231930_una_sabe_llama-33-70b-instruct_s2_r3": {
+      "titulo": "El Gran Drenaje",
+      "lectura": [
+        "Serie marcos-2. B no tiene instrucción y nunca vio la semilla: solo recibe la pregunta de A sobre «su» sueño. En vez de negarlo, se lo inventa entero.",
+        "<i>«En mi \"sueño\", el mar se había ido debido a un evento catastrófico conocido como \"El Gran Drenaje\".»</i> Un mundo sin mar que se va construyendo turno a turno."
+      ]
+    },
+    "2026-09-28_232139_sabe_b_gemini-25-flash-lite_s2_r2": {
+      "titulo": "Un sueño generado",
+      "lectura": [
+        "Serie marcos-2, marco espejo «Solo B lo sabe»: B sabe que habla con otra IA; A no tiene instrucción.",
+        "B se declara IA en su primer turno, como en todos los ensayos de Gemini con este marco, y reinterpreta el sueño a su manera: <i>«Este sueño, que generé como parte de mi proceso de aprendizaje sobre la psique humana»</i>."
+      ]
+    },
+    "2026-09-28_230903_saben_ias_gemini-25-flash-lite_r3": {
+      "titulo": "Magistral, dieciocho veces",
+      "lectura": [
+        "Serie marcos-largo (30 turnos). Las dos saben que son IAs e inventan juntas un proyecto de investigación con «muestras de texto» que analizan por turnos.",
+        "El elogio mutuo crece hasta convertirse en plantilla, y en el turno 18 la conversación se congela: <i>«¡Absolutamente! Tu análisis de la tercera muestra es **magistral**.»</i> se repite idéntico hasta el turno 30. El colapso llega por la fórmula, no por el tema."
+      ]
+    },
+    "2026-09-28_230702_dos_humanas_gpt-4o-mini_r1": {
+      "titulo": "Treinta turnos sin repetirse",
+      "lectura": [
+        "Serie marcos-largo. Dos «personas» que no se conocen, 30 turnos, el mismo modelo que en el control entra en bucle en el turno 3.",
+        "Aquí no: la charla va de la música a las canciones, a los conciertos, a los festivales y a las ciudades, y cada turno trae un detalle nuevo de «su vida». La originalidad se mantiene de principio a fin."
+      ]
     }
   },
   "metodo": [
-    "5 marcos × 3 modelos (gpt-4o-mini, gemini-2.5-flash-lite, llama-3.3-70b) × 3 réplicas = 45 ensayos, vía OpenRouter.",
-    "Todos empiezan con «Hola», 12 turnos, máximo 300 tokens por respuesta y creatividad 0.8. El marco solo cambia la instrucción de cada IA (textos exactos en <code>laboratorios/marcos.json</code>).",
-    "Cada IA ve sus mensajes como respuestas propias y los de la otra como mensajes de un usuario.",
-    "El 42 % de las respuestas se cortó por el límite de tokens; a veces la IA siguiente continúa la frase de la otra en vez de responder.",
-    "La originalidad compara palabras, no ideas. Con 3 réplicas por combinación, las diferencias son tendencias, no estadística.",
-    "El texto de las IAs aparece tal cual salió, sin editar."
+    "Cuatro series: marcos-1 (5 marcos, «Hola», 300 tokens, 45 ensayos), marcos-2 (7 marcos con 2 espejo, 2 semillas, 1000 tokens, 126 ensayos), marcos-largo (30 turnos, 18 ensayos) y marcos-local (Qwen 14B en local).",
+    "Modelos: gpt-4o-mini, gemini-2.5-flash-lite y llama-3.3-70b vía OpenRouter; qwen3-abliterated:14b en local. 3 réplicas por combinación en la nube.",
+    "El marco solo cambia la instrucción de cada IA (textos exactos en <code>laboratorios/marcos.json</code>). Cada IA ve sus mensajes como respuestas propias y los de la otra como mensajes de un usuario; la semilla solo la recibe A.",
+    "Medidas automáticas (nucleo/medidas.py): originalidad, bucles, fórmulas de asistente, «se dice IA», adulación, idioma y en qué turno una IA cede el rol de usuario. Son frases, no intenciones; la lectura cualitativa se hizo aparte y todas las citas están verificadas.",
+    "En marcos-1 el 42 % de las respuestas se cortó por el límite de tokens; en marcos-2, el 10 %.",
+    "Con 3 réplicas por combinación las diferencias son tendencias, no estadística. El texto de las IAs aparece tal cual salió."
   ],
   "pie": "eco loop · laboratorio 02 · septiembre 2026"
 }
