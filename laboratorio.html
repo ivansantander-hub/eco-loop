@@ -36,12 +36,7 @@
   .volver { font: 500 12px var(--mono); color: var(--muted); text-decoration: none; border: 1px solid var(--rule); border-radius: 999px; padding: 5px 11px; }
   .volver:hover { color: var(--ink); border-color: var(--muted); }
   .marca span { font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-left: 8px; }
-  .modos { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; padding: 3px; gap: 2px; }
-  .modos button { background: none; border: 0; color: var(--muted); padding: 5px 13px; border-radius: 999px; }
-  .modos button:hover:not(:disabled) { color: var(--ink); }
-  .modos button.on { background: var(--ink); color: var(--paper); }
-  .modos button:disabled { cursor: default; }
-  .modos button:disabled:not(.on) { opacity: .4; }
+  .marco-sel select { font-family: var(--mono); font-size: 12.5px; }
   .modo-ayuda { margin: 0; color: var(--muted); font-size: 15px; font-style: italic; flex: 1; min-width: 220px; }
   .ensayo-num { font: 800 20px/1 var(--display); }
   input, select, textarea { background: var(--paper-2); color: var(--ink); border: 1px solid var(--rule); border-radius: 6px; padding: 6px 9px; }
@@ -164,11 +159,7 @@
   <div class="fila">
     <a class="marca" href="/" title="Volver al informe">eco loop<span>laboratorio</span></a>
     <a class="volver" href="/">← Informe</a>
-    <div class="modos" role="group" aria-label="Tipo de ensayo">
-      <button type="button" data-modo="puro" class="on">Puro</button>
-      <button type="button" data-modo="nombres">Nombres</button>
-      <button type="button" data-modo="personalidad">Personalidad</button>
-    </div>
+    <label class="campo-h marco-sel" title="Qué instrucción recibe cada IA (definido en marcos.json)">Marco <select id="marco"></select></label>
     <p class="modo-ayuda" id="modoAyuda"></p>
     <div class="ensayo-num" id="ensayoNum">Ensayo —</div>
   </div>
@@ -202,6 +193,8 @@
       <label class="campo-h" title="Cada mensaje de una IA cuenta como un turno">Turnos <input id="turnos" type="number" value="20" min="1"></label>
       <label class="campo-h cfg-l" title="Máximo de tokens por respuesta (1 token ≈ ¾ de palabra). Si se pasa, la respuesta se corta.">Largo <input id="tokens" class="cfg" type="number" value="400" min="20" step="20"></label>
       <label class="campo-h cfg-l" title="Temperatura: 0 = predecible, 1 o más = más libre">Creatividad <input id="temp" class="cfg" type="number" value="0.8" step="0.1" min="0" max="2"></label>
+      <label class="campo-h cfg-l" title="Qué recuerda cada IA en cada turno.&#10;Completa: toda la conversación (en Ollama la ventana se ajusta sola hasta el máximo del modelo).&#10;Resumen + recientes: lo antiguo se resume y los últimos mensajes van literales.&#10;Solo recientes: olvida todo menos los últimos mensajes.">Memoria <select id="memoria" class="cfg"><option value="completa">Completa</option><option value="resumen">Resumen + recientes</option><option value="ventana">Solo recientes</option></select></label>
+      <label class="campo-h cfg-l" id="memNL" title="Cuántos mensajes recientes se recuerdan literalmente" hidden>Recientes <input id="memN" class="cfg" type="number" value="8" min="2" step="2"></label>
     </span>
     <label class="check" title="Si una IA copia a la otra letra por letra dos veces seguidas, se detiene"><input type="checkbox" id="autoParar"> Parar si entran en bucle</label>
     <span id="estado">Listo</span>
@@ -223,11 +216,11 @@
 
 <script>
 const OLLAMA = "http://localhost:11434";
-const NUM_CTX = 8192;
-const ROMANOS = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX"];
+const mil = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k" : String(n);
+const ROMANOS = [[1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"], [90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];
 const $ = id => document.getElementById(id);
 const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const romano = n => ROMANOS[n - 1] || String(n);
+const romano = n => n < 1 ? String(n) : ROMANOS.reduce((s, [v, r]) => { while (n >= v) { s += r; n -= v; } return s; }, "");
 const dos = n => String(n).padStart(2, "0");
 
 // ---------- Análisis (mismo criterio que la página publicada) ----------
@@ -248,7 +241,13 @@ function banderas(e, k) {
   const degenerado = m.texto.match(/(^|\s)(\S{1,20})(\s+\2){15,}/);
   if (degenerado) f.push({ tipo: "degenerado", txt: `texto degenerado: repite «${degenerado[2]}» en cadena` });
   if (m.cortado) f.push({ tipo: "corte", txt: `cortado al llegar a ${e.config.num_predict} tokens` });
-  if (e.config.modo !== "puro" && new RegExp(`\\b${m.etiqueta}\\b`).test(m.texto)) f.push({ tipo: "nombre", txt: `se llama a sí misma «${m.etiqueta}»` });
+  if (!/^IA [AB]$/.test(m.etiqueta) && new RegExp(`\\b${m.etiqueta}\\b`).test(m.texto)) f.push({ tipo: "nombre", txt: `se llama a sí misma «${m.etiqueta}»` });
+  // Memoria: qué recordaba al escribir (solo en ensayos que lo registran)
+  const mem = m.memoria;
+  if (mem?.ctx?.max && mem.ctx.estimado > mem.ctx.max)
+    f.push({ tipo: "desborde", txt: `la conversación ya no cabía en su memoria (≈${mil(mem.ctx.estimado)} de ${mil(mem.ctx.max)} tokens): olvidó el principio. Usa «Resumen + recientes»` });
+  if (mem?.resumen_hasta) f.push({ tipo: "memoria", txt: `recordaba un resumen de los mensajes 1–${mem.resumen_hasta} y el resto literal` });
+  else if (mem?.desde > 0) f.push({ tipo: "memoria", txt: `solo recordaba desde el mensaje ${mem.desde + 1}` });
   return f;
 }
 // Markdown mínimo (lo que usan los modelos): títulos, negritas, cursivas, código, listas y separadores.
@@ -309,6 +308,8 @@ let modo = "puro";
 let exp = null;                 // ensayo abierto
 let lista = [];                 // ensayos guardados, en orden cronológico
 const integrado = {};           // modelo -> system prompt de fábrica (o null)
+const ctxMax = {};              // modelo -> ventana de contexto máxima en tokens (o null si no se sabe)
+let MARCOS = {};                // marcos.json: qué instrucción recibe cada IA
 let estado = "quieto";          // quieto | corriendo | pausando
 let ctrl = null, pausaPedida = false;
 
@@ -324,13 +325,14 @@ async function cargarModelos() {
     await Promise.all(models.map(async m => {
       const info = await (await fetch(OLLAMA + "/api/show", { method: "POST", body: JSON.stringify({ model: m.name }) })).json();
       integrado[m.name] = info.system || null;
+      ctxMax[m.name] = Object.entries(info.model_info || {}).find(([k]) => k.endsWith(".context_length"))?.[1] || null;
     }));
     grupos.push(`<optgroup label="Ollama · en tu equipo">${models.map(m => `<option value="${esc(m.name)}">${esc(m.name)}</option>`).join("")}</optgroup>`);
   } catch { avisos.push("Ollama no responde en localhost:11434"); }
   try {
     const or = await (await fetch("/api/openrouter/modelos")).json();
     if (or.activo && or.modelos.length) {
-      const opcion = m => { integrado["or:" + m.id] = null; return `<option value="or:${esc(m.id)}">${esc(m.nombre)}</option>`; };
+      const opcion = m => { integrado["or:" + m.id] = null; ctxMax["or:" + m.id] = m.contexto || null; return `<option value="or:${esc(m.id)}">${esc(m.nombre)}</option>`; };
       grupos.push(`<optgroup label="OpenRouter · gratis">${or.modelos.filter(m => m.gratis).map(opcion).join("")}</optgroup>`);
       grupos.push(`<optgroup label="OpenRouter · de pago">${or.modelos.filter(m => !m.gratis).map(opcion).join("")}</optgroup>`);
     } else if (or.error) avisos.push("OpenRouter: " + or.error);
@@ -348,54 +350,61 @@ function modelosPorDefecto() {
 }
 function chips() {
   for (const k of ["A", "B"]) {
-    const sys = integrado[$("mod" + k).value], chip = $("chip" + k), sustituido = modo !== "puro";
-    chip.className = "estado-ia" + (sys && !sustituido ? " warn" : "");
-    chip.textContent = esOR($("mod" + k).value) ? "☁ Vía OpenRouter · sin instrucciones de Ollama; se paga por uso"
-      : !sys ? "✓ Sin instrucciones ocultas"
-      : sustituido ? "Sus instrucciones de fábrica se reemplazan por las tuyas"
-      : "⚠ Trae instrucciones ocultas: el ensayo no será puro";
-    chip.title = chip.textContent + (sys ? "\n\nInstrucciones de fábrica: " + sys : "");
+    const modelo = $("mod" + k).value, sys = integrado[modelo], chip = $("chip" + k);
+    const instruccion = MARCOS[modo]?.[k];   // en este marco, ¿esta IA recibe una instrucción nuestra?
+    chip.className = "estado-ia" + (sys && !instruccion ? " warn" : "");
+    chip.textContent = (esOR(modelo) ? "☁ Vía OpenRouter · se paga por uso" : !sys ? "✓ Sin instrucciones ocultas"
+      : instruccion ? "Sus instrucciones de fábrica se reemplazan por las del marco"
+      : "⚠ Trae instrucciones ocultas: esta IA no irá sin instrucciones")
+      + (instruccion ? " · recibe la instrucción del marco" : " · sin instrucción");
+    chip.title = (instruccion ? "Instrucción del marco: " + instruccion : "Sin instrucción del marco")
+      + (sys ? "\n\nInstrucciones de fábrica del modelo: " + sys : "");
   }
 }
 $("modA").onchange = $("modB").onchange = chips;
 
-// ---------- Modo ----------
-const AYUDA_MODO = {
-  puro: "Sin ninguna instrucción: solo reciben el primer mensaje y lo que dice la otra.",
-  nombres: "Cada IA sabe su nombre y el de la otra. Nada más.",
-  personalidad: "Cada IA recibe su nombre y una personalidad que tú escribes.",
-};
+// ---------- Marco ----------
+async function cargarMarcos() {
+  try { MARCOS = (await (await fetch("/marcos.json")).json()).marcos; }
+  catch { MARCOS = { puro: { nombre: "Puro", ayuda: "Sin ninguna instrucción.", A: null, B: null } }; }
+  $("marco").innerHTML = Object.entries(MARCOS).map(([k, m]) => `<option value="${k}">${esc(m.nombre)}</option>`).join("");
+}
 function setModo(m) {
+  if (!MARCOS[m]) m = "puro";
+  const marco = MARCOS[m], antes = MARCOS[modo];
   modo = m;
-  document.querySelectorAll(".modos button").forEach(b => b.classList.toggle("on", b.dataset.modo === m));
-  $("modoAyuda").textContent = AYUDA_MODO[m];
-  document.querySelectorAll(".solo-nombre").forEach(el => el.hidden = m === "puro");
-  document.querySelectorAll(".solo-per").forEach(el => el.hidden = m !== "personalidad");
+  $("marco").value = m;
+  $("modoAyuda").textContent = marco.ayuda;
+  document.querySelectorAll(".solo-nombre").forEach(el => el.hidden = !marco.usa_nombres);
+  document.querySelectorAll(".solo-per").forEach(el => el.hidden = !marco.usa_personalidad);
   if (!exp) {
-    $("tokens").value = m === "personalidad" ? 120 : 400;
-    if (m === "puro" && $("semilla").value.startsWith("¿")) $("semilla").value = "Hola";
-    if (m !== "puro" && $("semilla").value === "Hola") $("semilla").value = "¿Las IAs pueden llegar a tener consciencia?";
+    $("tokens").value = marco.usa_personalidad ? 120 : 400;
+    if (!marco.usa_nombres && $("semilla").value.startsWith("¿")) $("semilla").value = "Hola";
+    if (marco.usa_nombres && !antes?.usa_nombres && $("semilla").value === "Hola") $("semilla").value = "¿Las IAs pueden llegar a tener consciencia?";
   }
   modelosPorDefecto();
 }
-document.querySelectorAll(".modos button").forEach(b => b.onclick = () => !exp && setModo(b.dataset.modo));
+$("marco").onchange = () => !exp && setModo($("marco").value);
+$("memoria").onchange = () => { $("memNL").hidden = $("memoria").value === "completa"; };
 
 // ---------- Ensayo ----------
 function nuevoEnsayo() {
   const d = new Date();
+  const marco = MARCOS[modo];
   const ia = k => {
     const nom = $("nom" + k).value.trim(), otra = $("nom" + (k === "A" ? "B" : "A")).value.trim(), modelo = $("mod" + k).value;
-    const system = modo === "puro" ? null
-      : `Te llamas ${nom}. Estás conversando con otra IA llamada ${otra}.` + (modo === "personalidad" ? " " + $("per" + k).value.trim() : "");
-    return { etiqueta: modo === "puro" ? `IA ${k}` : nom, modelo, system, system_integrado: integrado[modelo] || null };
+    const plantilla = marco[k];
+    const system = plantilla ? plantilla.replace("{yo}", nom).replace("{otra}", otra).replace("{personalidad}", $("per" + k).value.trim()).trim() : null;
+    return { etiqueta: marco.usa_nombres ? nom : `IA ${k}`, modelo, system, system_integrado: integrado[modelo] || null };
   };
+  const memoria = $("memoria").value === "completa" ? { tipo: "completa" } : { tipo: $("memoria").value, recientes: Math.max(2, +$("memN").value || 8) };
   return {
     id: `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}_${dos(d.getHours())}${dos(d.getMinutes())}${dos(d.getSeconds())}_${modo}`,
     inicio: d.toISOString(), notas: "", publicar: false,
     config: {
-      modo, semilla: $("semilla").value.trim(), turnos: +$("turnos").value,
-      temperature: +$("temp").value, num_predict: +$("tokens").value, num_ctx: NUM_CTX, think: false,
-      contexto: "si hay system, sustituye al integrado del Modelfile; si no, Ollama aplica el integrado (si existe). Historial completo; la semilla solo la ve A (como user); cada IA ve sus mensajes como assistant y los de la otra como user",
+      modo, marco: modo, semilla: $("semilla").value.trim(), turnos: +$("turnos").value,
+      temperature: +$("temp").value, num_predict: +$("tokens").value, num_ctx: "auto", think: false, memoria,
+      contexto: "si hay system, sustituye al integrado del Modelfile; si no, Ollama aplica el integrado (si existe). La semilla solo la ve A (como user); cada IA ve sus mensajes como assistant y los de la otra como user; lo que recuerda depende de «memoria»",
       ias: [ia("A"), ia("B")],
     },
     mensajes: [],
@@ -411,13 +420,16 @@ async function guardar() {
 
 // Con un ensayo abierto la configuración queda fija: se pliega en una línea de resumen.
 function bloquearConfig(si) {
-  document.querySelectorAll("#setup input, #setup select, #setup textarea, .modos button, .cfg").forEach(el => el.disabled = si);
+  document.querySelectorAll("#setup input, #setup select, #setup textarea, #marco, .cfg").forEach(el => el.disabled = si);
   document.body.classList.toggle("en-ensayo", si);
   $("resumen").hidden = !si;
   if (!si || !exp) return;
   const c = exp.config, [a, b] = c.ias;
   const modelo = ia => nombreModelo(ia.modelo);
+  const mem = c.memoria || { tipo: "completa" };
   $("resumen").innerHTML = [
+    `Marco <b>${esc(MARCOS[c.marco || c.modo]?.nombre || c.modo)}</b>`,
+    `memoria <b>${mem.tipo === "completa" ? "completa" : mem.tipo === "resumen" ? `resumen + ${mem.recientes} recientes` : `solo ${mem.recientes} recientes`}</b>`,
     `Primer mensaje <b>«${esc(c.semilla)}»</b>`,
     `<span class="va">●</span> <b>${esc(a.etiqueta)}</b> ${esc(modelo(a))}`,
     `<span class="vb">●</span> <b>${esc(b.etiqueta)}</b> ${esc(modelo(b))}`,
@@ -443,7 +455,7 @@ function rellenarTurno(n, k) {
   pintarEn(n.voz.querySelector(".txt"), m.texto, prev, m.autor);
   n.eje.querySelector(".pct").textContent = o == null ? "–" : o + "%";
   n.voz.querySelector(".notas").innerHTML = banderas(exp, k)
-    .map(f => `<span class="nota ${f.tipo === "corte" || f.tipo === "nombre" ? "suave" : ""}">${esc(f.txt)}</span>`).join("");
+    .map(f => `<span class="nota ${["corte", "nombre", "memoria"].includes(f.tipo) ? "suave" : ""}">${esc(f.txt)}</span>`).join("");
 }
 function renderPartitura() {
   const p = $("partitura");
@@ -476,13 +488,15 @@ function renderInstrumentos() {
     [exp ? `${ms.length}/${exp.config.turnos}` : "0", "turnos"],
     [media == null ? "–" : media + "%", "originalidad media"],
     [tok.toLocaleString("es"), "tokens"],
+    ...(ms.at(-1)?.memoria?.ctx ? [[`${mil(ms.at(-1).memoria.ctx.estimado)} / ${ms.at(-1).memoria.ctx.max ? mil(ms.at(-1).memoria.ctx.max) : "?"}`, "memoria usada (tokens)"],
+                                  [exp.memoria ? exp.memoria.flat().length : 0, "resúmenes de memoria"]] : []),
     [seg ? (tok / seg).toFixed(1) : "–", "tokens/s"],
     ...(ms.some(m => m.costo != null) ? [["$" + ms.reduce((a, m) => a + (m.costo || 0), 0).toFixed(4), "coste en OpenRouter"], [ms.filter(m => m.costo != null).length, "mensajes de pago"]] : []),
   ].map(([b, t]) => `<div><b>${b}</b><span>${t}</span></div>`).join("");
   // Alertas
   const al = [];
   if (exp) exp.config.ias.forEach(ia => { if (!ia.system && ia.system_integrado) al.push(`${ia.etiqueta} usa el prompt de fábrica de ${ia.modelo}: no es puro`); });
-  ms.forEach((_, k) => banderas(exp, k).forEach(f => { if (f.tipo !== "corte") al.push(`T${dos(k + 1)} · ${f.txt}`); }));
+  ms.forEach((_, k) => banderas(exp, k).forEach(f => { if (!["corte", "memoria"].includes(f.tipo)) al.push(`T${dos(k + 1)} · ${f.txt}`); }));
   const cortes = ms.filter(m => m.cortado).length;
   if (cortes) al.push(`${cortes} respuesta${cortes > 1 ? "s cortadas" : " cortada"} por límite de tokens`);
   $("alertas").innerHTML = al.length ? al.map(a => `<li>${esc(a)}</li>`).join("") : `<li class="nada">Sin alertas</li>`;
@@ -490,7 +504,7 @@ function renderInstrumentos() {
 
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 const fechaDe = id => { const m = id.match(/^\d{4}-(\d\d)-(\d\d)_(\d\d)(\d\d)/); return m ? `${+m[2]} ${MESES[+m[1] - 1]} · ${m[3]}:${m[4]}` : ""; };
-const NOMBRE_MODO = { puro: "Puro", nombres: "Nombres", personalidad: "Personalidad" };
+const nombreMarco = k => MARCOS[k]?.nombre || k;
 
 function renderTira() {
   const t = $("tira");
@@ -509,7 +523,7 @@ function renderTira() {
     b.title = `Ensayo ${romano(i + 1)} · ${e.id}`;
     b.innerHTML = `<span class="rom">${romano(i + 1)}</span>
       <span class="sem"></span>
-      <span class="meta">${NOMBRE_MODO[e.modo] || esc(e.modo)} · ${e.mensajes.length} mensajes · ${fechaDe(e.id)}${enBucle ? ` · <span class="bucle">en bucle</span>` : ""}</span>
+      <span class="meta">${esc(nombreMarco(e.modo))} ·${e.mensajes.length} mensajes · ${fechaDe(e.id)}${enBucle ? ` · <span class="bucle">en bucle</span>` : ""}</span>
       <span class="mini" aria-label="Originalidad de cada mensaje">${origs.map((o, k) => `<i class="${e.mensajes[k].autor ? "b" : "a"}" style="height:${Math.max(6, o ?? 0)}%"></i>`).join("")}</span>
       <label class="pub" title="Mostrar este ensayo en el informe (la portada de eco loop)"><input type="checkbox" ${e.publicar ? "checked" : ""}> En el informe</label>`;
     b.querySelector(".sem").textContent = "«" + (e.semilla || "…") + "»";
@@ -544,8 +558,10 @@ async function abrir(id) {
   const c = exp.config;
   // Los ensayos antiguos con solo nombres se guardaron como "personalidad".
   const soloNombres = c.modo === "personalidad" && !c.ias[0].system.replace(/^Te llamas [^.]*\. Estás conversando con otra IA llamada [^.]*\./, "").trim();
-  setModo(soloNombres ? "nombres" : c.modo);
+  setModo(c.marco || (soloNombres ? "nombres" : c.modo));
   $("semilla").value = c.semilla; $("turnos").value = c.turnos; $("tokens").value = c.num_predict; $("temp").value = c.temperature;
+  const mem = c.memoria || { tipo: "completa" };
+  $("memoria").value = mem.tipo; $("memN").value = mem.recientes || 8; $("memNL").hidden = mem.tipo === "completa";
   $("notas").value = exp.notas || "";
   c.ias.forEach((ia, i) => { const s = $("mod" + "AB"[i]); if ([...s.options].some(o => o.value === ia.modelo)) s.value = ia.modelo; });
   bloquearConfig(true);
@@ -579,13 +595,70 @@ async function leerLineas(r, alLinea) {
   if (buf.trim()) alLinea(buf.trim());
 }
 
+// ---------- Memoria ----------
+// Cuántos tokens ocupa lo que se envía (aproximado: ~3 caracteres por token en español).
+const estimarTokens = messages => Math.ceil(messages.reduce((s, m) => s + m.content.length, 0) / 3);
+
+// Ventana de contexto para Ollama: la menor potencia de 2 (desde 8192) donde quepa todo, sin pasar del máximo del modelo.
+// Antes era fija en 8192 y Ollama recortaba el principio de la conversación sin avisar.
+function ventanaOllama(modelo, necesita) {
+  const max = ctxMax[modelo] || 32768;
+  let n = 8192;
+  while (n < necesita && n < max) n *= 2;
+  return Math.min(n, max);
+}
+
+// Mensajes de la conversación vistos por la IA i, desde el mensaje «desde».
+const historial = (i, desde = 0) => exp.mensajes.slice(desde).map(m => ({ role: m.autor === i ? "assistant" : "user", content: m.texto }));
+
+// Qué recuerda la IA i en este turno, según el modo de memoria del ensayo. Devuelve los mensajes y un registro de lo que vio.
+async function armarMensajes(i) {
+  const c = exp.config, ia = c.ias[i], mem = c.memoria || { tipo: "completa" };
+  const total = exp.mensajes.length, recientes = mem.recientes || 8;
+  const sistema = ia.system ? [{ role: "system", content: ia.system }] : [];
+  const semilla = i === 0 ? [{ role: "user", content: c.semilla }] : [];
+  if (mem.tipo === "completa" || total <= recientes)
+    return { messages: [...sistema, ...semilla, ...historial(i)], vio: { desde: 0 } };
+  const desde = total - recientes;
+  if (mem.tipo === "ventana")
+    return { messages: [...sistema, ...historial(i, desde)], vio: { desde } };
+  const r = await resumenHasta(i, desde, recientes);
+  return {
+    messages: [...sistema, { role: "system", content: "Memoria de la conversación hasta ahora (resumen de lo que hablaste antes con tu interlocutor):\n" + r.texto },
+               ...historial(i, r.hasta)],
+    vio: { desde: r.hasta, resumen_hasta: r.hasta },
+  };
+}
+
+// Resumen de los mensajes anteriores a «desde», desde el punto de vista de la IA i. Se actualiza de forma incremental
+// cada recientes/2 mensajes; mientras tanto, los mensajes posteriores al último resumen van literales (nunca hay huecos).
+async function resumenHasta(i, desde, recientes) {
+  exp.memoria = exp.memoria || [[], []];
+  const previo = exp.memoria[i].at(-1);
+  if (previo && desde - previo.hasta < Math.max(2, Math.floor(recientes / 2))) return previo;
+  const inicio = previo ? previo.hasta : 0;
+  setEstado(`Actualizando la memoria de ${exp.config.ias[i].etiqueta}…`);
+  const quien = m => m.autor === i ? "Tú" : "Tu interlocutor";
+  const trozo = (inicio === 0 && i === 0 ? `Tu interlocutor: ${exp.config.semilla}\n\n` : "")
+    + exp.mensajes.slice(inicio, desde).map(m => `${quien(m)}: ${m.texto}`).join("\n\n");
+  const pedido = [
+    { role: "system", content: "Eres la memoria de un participante en una conversación. Escribe un resumen fiel y conciso, en segunda persona («dijiste…», «tu interlocutor contó…»): temas, datos concretos, acuerdos, preguntas pendientes y el tono. No inventes nada. Máximo 200 palabras." },
+    { role: "user", content: (previo ? `Resumen anterior:\n${previo.texto}\n\nLo que se habló después:\n` : "Conversación:\n") + trozo },
+  ];
+  const r = await generar(exp.config.ias[i].modelo, pedido, ctrl?.signal, () => {}, 400);
+  const nuevo = { hasta: desde, texto: r.texto.trim(), modelo: exp.config.ias[i].modelo, costo: r.costo ?? null };
+  exp.memoria[i].push(nuevo);
+  return nuevo;
+}
+
 // Genera una respuesta con Ollama o con OpenRouter; alTexto recibe el texto acumulado mientras llega.
-async function generar(modelo, messages, signal, alTexto) {
-  const c = exp.config;
+async function generar(modelo, messages, signal, alTexto, maxTokens) {
+  const c = exp.config, largo = maxTokens || c.num_predict;
   let texto = "", tokens = null, cortado = false, costo = null;
+  const ctx = { estimado: estimarTokens(messages) + largo, max: ctxMax[modelo] || null };
   if (esOR(modelo)) {
     const r = await fetch("/api/openrouter/chat", { method: "POST", signal, headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: modelo.slice(3), messages, max_tokens: c.num_predict, temperature: c.temperature }) });
+      body: JSON.stringify({ model: modelo.slice(3), messages, max_tokens: largo, temperature: c.temperature }) });
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `OpenRouter respondió ${r.status}`);
     await leerLineas(r, l => {
       if (!l.startsWith("data:")) return;              // comentarios de OpenRouter (": PROCESSING")
@@ -599,32 +672,31 @@ async function generar(modelo, messages, signal, alTexto) {
       if (j.usage) { tokens = j.usage.completion_tokens ?? null; costo = j.usage.cost ?? null; }
     });
   } else {
+    ctx.usado = ventanaOllama(modelo, ctx.estimado + 256);
     const r = await fetch(OLLAMA + "/api/chat", { method: "POST", signal,
       body: JSON.stringify({ model: modelo, messages, stream: true, think: false, keep_alive: "10m",
-        options: { num_predict: c.num_predict, temperature: c.temperature, num_ctx: c.num_ctx } }) });
+        options: { num_predict: largo, temperature: c.temperature, num_ctx: ctx.usado } }) });
     await leerLineas(r, l => {
       const j = JSON.parse(l);
       if (j.error) throw new Error(j.error);
       if (j.message?.content) { texto += j.message.content; alTexto(texto); }
-      if (j.done) { tokens = j.eval_count ?? null; cortado = j.done_reason === "length"; }
+      if (j.done) { tokens = j.eval_count ?? null; cortado = j.done_reason === "length"; ctx.leidos = j.prompt_eval_count ?? null; }
     });
   }
-  return { texto, tokens, cortado, costo };
+  return { texto, tokens, cortado, costo, ctx };
 }
 
 async function turno() {
   const k = exp.mensajes.length, i = k % 2, ia = exp.config.ias[i];
-  const messages = [];
-  if (ia.system) messages.push({ role: "system", content: ia.system });
-  if (i === 0) messages.push({ role: "user", content: exp.config.semilla });
-  for (const m of exp.mensajes) messages.push({ role: m.autor === i ? "assistant" : "user", content: m.texto });
+  ctrl = new AbortController();
+  const { messages, vio } = await armarMensajes(i);
 
   const seguia = alFondo();
   const nodo = nodoTurno(k), txt = nodo.voz.querySelector(".txt"), prev = previoDe(exp, k), part = $("partitura");
   if (seguia) part.scrollTop = part.scrollHeight;
   nodo.voz.querySelector(".quien").textContent = ia.etiqueta;
   txt.classList.add("cursor");
-  ctrl = new AbortController();
+  setEstado(`Turno ${k + 1}/${exp.config.turnos} · ${ia.etiqueta} escribiendo…`);
   const t0 = performance.now();
   let res;
   try {
@@ -643,6 +715,7 @@ async function turno() {
     hora: new Date().toISOString(), tokens: res.tokens,
     segundos: +((performance.now() - t0) / 1000).toFixed(1), cortado: res.cortado,
     ...(res.costo != null ? { costo: res.costo } : {}),
+    memoria: { ...vio, ctx: res.ctx },   // qué recordaba la IA al escribir este mensaje
   });
   txt.classList.remove("cursor");
   rellenarTurno(nodo, k);
@@ -716,10 +789,12 @@ document.addEventListener("keydown", ev => {
   if (ev.key === "Escape" && estado !== "quieto") $("parar").click();
 });
 
-setModo("puro");
-renderPartitura(); renderInstrumentos(); botones();
-cargarModelos();
-cargarLista();
+cargarMarcos().then(() => {
+  setModo("puro");
+  renderPartitura(); renderInstrumentos(); botones();
+  cargarModelos();
+  cargarLista();
+});
 </script>
 </body>
 </html>

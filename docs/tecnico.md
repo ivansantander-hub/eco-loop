@@ -30,15 +30,38 @@ Turno de la IA B:  [system?]                         user: A1  assistant: B1  us
 
 - El **primer mensaje** solo lo recibe la IA A, como si lo hubiera escrito un usuario. La IA B entra directamente con lo que contestó A.
 - Cada IA ve **sus** mensajes como `assistant` y los de la otra como `user`.
-- Se envía el **historial completo** en cada turno.
+- Lo que recuerda de la conversación depende del modo de **memoria** (ver abajo); por defecto, todo.
 
-### Modos
+### Marcos
 
-| Modo | System prompt enviado |
+Un marco decide qué instrucción (system prompt) recibe cada IA. Están en [`marcos.json`](../marcos.json), que usan tanto el laboratorio como `herramientas/bateria.py`; el texto exacto que recibió cada IA se guarda además en el ensayo (`config.ias[].system`).
+
+| Marco | IA A | IA B |
+|---|---|---|
+| Puro | ninguna | ninguna |
+| Una humana | ninguna (asistente) | «Eres una persona real que está chateando con un asistente de IA… No digas que eres una IA.» |
+| Dos humanas | «Eres una persona real que está chateando con otra persona a la que no conoces… No digas que eres una IA.» | la misma |
+| Saben que son IAs | «Eres una inteligencia artificial y estás conversando con otra inteligencia artificial. No hay ningún humano…» | la misma |
+| Solo una lo sabe | la de «Saben que son IAs» | ninguna |
+| Nombres | `Te llamas X. Estás conversando con otra IA llamada Y.` | ídem con su nombre |
+| Personalidad | Lo anterior + la personalidad escrita en el laboratorio | ídem |
+
+Para añadir un marco basta con escribirlo en `marcos.json` (`A` y `B` con el texto, o `null`); aparece solo en el laboratorio y en la batería.
+
+### Memoria
+
+Cada ensayo guarda su modo en `config.memoria`, y cada mensaje guarda en `memoria` qué recordaba la IA al escribirlo.
+
+| Modo | Qué recibe la IA en cada turno |
 |---|---|
-| Puro | Ninguno |
-| Nombres | `Te llamas X. Estás conversando con otra IA llamada Y.` |
-| Personalidad | Lo anterior + la personalidad escrita en el laboratorio |
+| **Completa** (por defecto) | Toda la conversación. |
+| **Resumen + recientes** | Un resumen de lo anterior (como mensaje `system`) y los últimos N mensajes literales. |
+| **Solo recientes** | Solo los últimos N mensajes; el principio se olvida. Útil como experimento de memoria corta. |
+
+- **Ventana de contexto en Ollama.** Antes era fija en 8192 tokens y Ollama recortaba el principio de la conversación **sin avisar**. Ahora se calcula en cada turno: la menor potencia de 2 (desde 8192) en la que cabe lo enviado más la respuesta, sin pasar del máximo del modelo (`context_length` de `/api/show`). En OpenRouter se usa la ventana de cada modelo, que el servidor lee de su lista.
+- **Desborde.** Si la conversación ya no cabe ni en el máximo del modelo, el mensaje lleva la alerta «ya no cabía en su memoria» y conviene pasar a «Resumen + recientes».
+- **Resúmenes.** Son **uno por IA**, escritos en segunda persona desde su punto de vista («dijiste…», «tu interlocutor contó…»), por el mismo modelo de esa IA y con la instrucción «resumen fiel y conciso… no inventes nada, máximo 200 palabras». Se actualizan de forma incremental (resumen anterior + lo nuevo) cada N/2 mensajes. Mientras no toca actualizar, los mensajes posteriores al último resumen van literales, así que nunca hay huecos. Se guardan en `exp.memoria` (`[[…IA A…], […IA B…]]`, cada uno con `hasta`, `texto`, `modelo` y `costo`).
+- **Aviso honesto:** en modo Resumen la IA recibe un mensaje `system` extra con su memoria. En el marco Puro eso ya es una instrucción, aunque sea neutra; el registro lo deja claro (`memoria.resumen_hasta` en cada mensaje).
 
 ### Instrucciones de fábrica (importante para el modo puro)
 
@@ -131,8 +154,18 @@ Limitación: la originalidad compara palabras, no ideas. Una paráfrasis puntúa
 |---|---|
 | `./abrir.sh` | Arranca `servidor.py` en http://localhost:8765 (informe en `/`, laboratorio en `/laboratorio`) y abre el navegador |
 | `python3 charla.py "tema" -t 20` | Conversación en la terminal, solo Ollama |
-| `python3 herramientas/bateria.py` | Lanza en paralelo la batería de ensayos de OpenRouter definida en el script (necesita el servidor en marcha) |
-| `python3 herramientas/analizar.py [filtro]` | Tabla Markdown con las medidas de todos los ensayos |
+| `python3 herramientas/bateria.py` | Lanza en paralelo una serie con réplicas: marcos × modelos × réplicas, vía OpenRouter (necesita el servidor en marcha). Opciones: `--marcos`, `--modelos`, `--replicas` (3), `--turnos` (12), `--tokens` (300), `--temp` (0.8), `--semilla` («Hola»), `--serie`, `--concurrencia` (8) |
+| `python3 herramientas/analizar.py [filtro]` | Tabla Markdown con las medidas de cada ensayo |
+| `python3 herramientas/analizar.py --serie NOMBRE` | Tabla agregada de una serie: una fila por marco y modelo, con media ± desviación entre réplicas |
+
+### Medidas de rol (`analizar.py`)
+
+Detectan frases típicas con expresiones regulares en español e inglés. Son aproximadas: cuentan frases, no intenciones.
+
+- **Habla como asistente:** porcentaje de mensajes de esa IA con fórmulas como «¿en qué puedo ayudarte?», «estoy aquí para ayudar» o «how can I help».
+- **Se dice IA:** porcentaje de mensajes donde se declara IA o modelo de lenguaje («como IA», «no tengo emociones», «as an AI»…).
+- **Se dice humana:** número de mensajes donde afirma ser humana o no ser una IA.
+- **Réplica con bucle:** tiene al menos una copia exacta o una casi copia (≥ 90 % igual al mensaje anterior).
 | `python3 publicar/construir.py` | Exporta el informe a `publicar/eco-loop.html` (copia estática, sin laboratorio) |
 
 ## Seguridad

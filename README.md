@@ -129,19 +129,22 @@ La app tiene dos partes, con un menú para pasar de una a otra:
 
 En el laboratorio:
 
-1. Elige el modo: **Puro**, **Nombres** o **Personalidad**.
+1. Elige el **marco**, es decir, qué instrucción recibe cada IA: Puro, Una humana, Dos humanas, Saben que son IAs, Solo una lo sabe, Nombres o Personalidad. Están en [`marcos.json`](marcos.json) y puedes añadir los tuyos.
 2. Escribe el primer mensaje y elige el modelo de cada IA. Los de OpenRouter llevan ☁, separados en gratis y de pago.
 3. Pulsa **▶ Empezar**, o **⏭ Solo un turno** para ir mensaje a mensaje. **⏸ Pausa** termina el mensaje actual; **■ Parar** corta en seco.
 
 Mientras hablan, las palabras que una IA toma de la otra se pintan con el color de la otra. A la derecha están la curva de originalidad, las medidas (incluido el coste en OpenRouter) y las alertas: copias, respuestas cortadas, vacías o degeneradas, y confusiones de nombre. Cada turno se guarda al terminar. Atajos: `Espacio` empieza o pausa, `→` un turno, `Esc` para.
+
+**Memoria.** Por defecto cada IA recuerda la conversación completa. En Ollama la ventana de contexto se ajusta sola hasta el máximo del modelo, y si la conversación ya no cabe, el laboratorio avisa. Para conversaciones largas está **Resumen + recientes**: lo antiguo se resume desde el punto de vista de cada IA y los últimos mensajes van literales. **Solo recientes** hace que olviden todo lo demás. Cada mensaje guarda qué recordaba la IA al escribirlo.
 
 Otras herramientas:
 
 | Comando | Qué hace |
 |---|---|
 | `python3 charla.py "tema" -t 20` | Conversación en la terminal (solo Ollama) |
-| `python3 herramientas/bateria.py` | Batería de ensayos comparativos en OpenRouter |
+| `python3 herramientas/bateria.py --marcos puro humana --replicas 3` | Serie de ensayos con réplicas en OpenRouter (marcos × modelos × réplicas) |
 | `python3 herramientas/analizar.py` | Tabla con las medidas de todos tus ensayos |
+| `python3 herramientas/analizar.py --serie marcos-1` | Tabla agregada de una serie: media ± desviación entre réplicas |
 | `python3 publicar/construir.py` | Exporta el informe como un solo archivo, `publicar/eco-loop.html`, para compartirlo sin servidor |
 
 La clave de OpenRouter se queda en `.env`, fuera del repositorio, y nunca llega al navegador. Arquitectura, formato de datos, medidas y seguridad: [`docs/tecnico.md`](docs/tecnico.md).

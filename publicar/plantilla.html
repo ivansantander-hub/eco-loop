@@ -197,7 +197,9 @@ document.getElementById("navLab").hidden = !CON_LABORATORIO;
 const VACIAS = new Set(("a al algo algún alguna ante antes aquí así aun aunque cada como con contra cual cuando de del desde donde dos e el ella ellas ello ellos en entre era eres es esa esas ese eso esos esta está están estas este esto estos estoy fue ha han has hay he la las le les lo los más me mi mí mis muy nada ni no nos o os otra otro para pero poco por porque qué que quien se sea ser si sí sin sino sobre son soy su sus tal también te ti tan tu tú tus un una uno unos unas y ya yo the and you i to of").split(" "));
 const norm = w => w.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 const contenido = t => t.split(/\s+/).map(norm).filter(w => w.length > 2 && !VACIAS.has(w));
-const ROMANOS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
+const aRomano = n => [[50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]]
+  .reduce((s, [v, r]) => { while (n >= v) { s += r; n -= v; } return s; }, "");
+const ROMANOS = Array.from({ length: 89 }, (_, i) => aRomano(i + 1));
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const reducir = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -332,7 +334,7 @@ function ensayo(e, a, k) {
   sec.innerHTML = `
     <div class="ens-cab">
       <div class="num" aria-hidden="true">${ROMANOS[k]}</div>
-      <div class="eyebrow">Ensayo ${ROMANOS[k]} · ${e.config.modo === "puro" ? "sin personalidad" : "con nombres"} · ${e.mensajes.length} turnos</div>
+      <div class="eyebrow">Ensayo ${ROMANOS[k]} · ${esc((TEXTOS.marcos || {})[e.config.marco || e.config.modo] || e.config.modo)} · ${e.mensajes.length} turnos</div>
       <h2>${esc(t.titulo || "Ensayo " + ROMANOS[k])}</h2>
     </div>
     <div class="ens-cuerpo">

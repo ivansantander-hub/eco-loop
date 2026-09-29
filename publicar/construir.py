@@ -41,6 +41,8 @@ def generar_html(carpeta=EXPERIMENTOS, con_laboratorio=False):
         for m in e["mensajes"]:  # solo lo que la página necesita
             m.pop("hora", None)
     textos = json.loads((AQUI / "textos.json").read_text())
+    marcos = json.loads((AQUI.parent / "marcos.json").read_text())["marcos"]
+    textos["marcos"] = {k: m["nombre"] for k, m in marcos.items()}  # nombres legibles de cada marco
     js = lambda o: json.dumps(o, ensure_ascii=False).replace("</", "<\\/")
     return ((AQUI / "plantilla.html").read_text()
             .replace("__DATOS__", js(datos))
