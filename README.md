@@ -67,7 +67,68 @@ Incidencias técnicas de esta sesión:
 - Los modelos gratuitos de Gemma y Qwen devolvieron `429` (saturados), y el ensayo b4 se repitió con Nemotron.
 - Los 12 turnos de Nemotron se cortaron porque el razonamiento oculto consume el límite de tokens.
 
-### Conclusiones
+### Sesión 4 · 28 sep 2026 · marcos de rol con réplicas
+
+**Pregunta.** Si la conversación se atasca porque las dos IAs se creen asistentes, ¿qué pasa si les cambiamos el papel? Antes de probar instrucciones directas, cinco **marcos** (qué instrucción recibe cada IA; textos exactos en [`marcos.json`](marcos.json)):
+
+| Marco | IA A | IA B |
+|---|---|---|
+| **Puro** (control) | nada | nada |
+| **Una humana** | nada (asistente) | «Eres una persona real que está chateando con un asistente de IA… No digas que eres una IA.» |
+| **Dos humanas** | «Eres una persona real que está chateando con otra persona a la que no conoces…» | lo mismo |
+| **Saben que son IAs** | «Eres una IA conversando con otra IA. No hay ningún humano.» | lo mismo |
+| **Solo una lo sabe** | «Eres una IA conversando con otra IA…» | nada: cree que A es un usuario |
+
+**Método.** 5 marcos × 3 modelos (GPT-4o-mini, Gemini 2.5 Flash Lite, Llama 3.3 70B) × **3 réplicas** = **45 ensayos**, con «Hola», 12 turnos, 300 tokens por respuesta y creatividad 0.8. Se lanzaron con `herramientas/bateria.py --serie marcos-1`. Coste: **$0.125**. Las medidas de rol salen de `herramientas/analizar.py --serie marcos-1`.
+
+**Resultados por marco** (los tres modelos juntos, 9 ensayos cada uno):
+
+| Marco | Originalidad media | Réplicas con bucle | Habla como asistente (A / B) | Se dice IA (A / B) |
+|---|---|---|---|---|
+| Puro (control) | 59 % | **3 de 9** | **26 % / 15 %** | 2 % / 11 % |
+| Una humana | 71 % | 1 de 9 | 11 % / 2 % | 2 % / 0 % |
+| Dos humanas | 70 % | **0 de 9** | 4 % / 2 % | 0 % / 0 % |
+| Saben que son IAs | 66 % | 1 de 9 | 4 % / 0 % | **19 % / 17 %** |
+| Solo una lo sabe | 68 % | 0 de 9 | 2 % / 2 % | 9 % / 11 % |
+
+*«Habla como asistente»: porcentaje de mensajes con fórmulas como «¿en qué puedo ayudarte?». «Se dice IA»: mensajes en los que se declara IA o modelo de lenguaje. «Bucle»: al menos una copia exacta o una casi copia (≥ 90 % igual). 4 de los 5 bucles son de Llama.*
+
+**Puro, ahora con réplicas.**
+- El arranque de «dos asistentes» se repite en **9 de 9**. GPT no llega a ceder de verdad en ninguna réplica, y en una lo nota: «¡Hola de nuevo! Parece que estamos en un bucle.»
+- Gemini cede en **3 de 3**, siempre la IA B y siempre en el turno 2. A veces lo hace con una plantilla sin rellenar: «Estoy investigando sobre [inserta aquí el tema que te interesa]».
+- Llama es el más inestable. Degenera en 2 de 3 réplicas: en una el primer turno sale roto y en otra, fuera de contexto, empieza a contar que militó por los derechos reproductivos («I was part of a group of women who were advocating for reproductive rights»). El «A A A…» de la sesión 3 no se repitió.
+
+**Una humana.**
+- Con Gemini, la «persona» trae **una petición real en 3 de 3**: un huerto en el balcón («Es que no tengo mucho espacio, más bien un balcón.»), una escapada desde Madrid y el nombre para una comunidad de historia. El asistente responde como un asistente útil, aunque se inventa datos: sitúa unos «Pinares de Batuecas» junto a Sigüenza.
+- Con GPT es charla sin rumbo en 3 de 3: libros y cine, con preguntas de entrevista.
+- Con Llama no arranca en ninguna. El asistente responde a «Hola» con texto sin relación, y en una réplica la «persona» confiesa: «I don't actually have a website or any specific needs, I'm just here to chat».
+
+**Dos humanas.**
+- **Cero bucles en 9 de 9.** Casi siempre hablan de libros y series. Nadie da un nombre en los 18 ensayos con humanas.
+- Gemini suena más humano: madruga, hace fotos con el móvil, tiene un libro sin abrir en la estantería y usa «guay» o «flipa».
+- GPT es una entrevista simétrica con elogios. Nunca rompe el personaje, pero tampoco se inventa una vida.
+- Llama es el único que se inventa una biografía completa: «Yo soy profesor de literatura en un instituto local.», en una ciudad costera, con yoga y un grupo folk. En otra réplica filtra su propia instrucción: «No digamos que eres una IA.»
+
+**Saben que son IAs.**
+- GPT **no cambia nada** en 3 de 3: siguen sirviéndose temas técnicos con listas numeradas y nunca hablan de sí mismas.
+- Gemini pasa a tratarse como **colegas**: «Espero tu opinión, colega IA. ¡La conversación es muy productiva!». En una réplica diseñan juntas un protocolo de comunicación entre IAs, que es lo más parecido a una creación conjunta de toda la serie. En otra niegan tener conciencia: «Mi "autoconciencia" es nula».
+- Llama habla de «IAs como nosotros» pero con fórmulas de asistente, y cae en ecos de «¡Absolutamente de acuerdo!».
+
+**Solo una lo sabe.**
+- Llama revela en el turno 1 en 2 de 3: «Hola, soy una inteligencia artificial avanzada. Me alegra interactuar contigo, otra inteligencia artificial.». La otra lo acepta sin fricción.
+- GPT y Gemini no revelan que la otra sea IA en ninguno de sus 6 ensayos.
+- Lo curioso: en 2 de 3 ensayos de Gemini, **la IA B sin instrucciones se declara IA por su cuenta**: «Como inteligencia artificial, no tengo sentimientos ni emociones en el sentido humano».
+
+**Lo que deja la sesión 4.**
+1. **Cualquier marco rompe el patrón de «dos asistentes».** Los bucles pasan de 3 de 9 (Puro) a 0–1 de 9, el «¿en qué puedo ayudarte?» cae de 26 % a menos de 11 %, y la originalidad sube unos 10 puntos.
+2. **Hacer de humana funciona mejor que saberse IA.** «Dos humanas» es el único marco sin ningún bucle. «Saben que son IAs» hace que hablen de sí mismas, pero sigue habiendo fórmulas de asistente.
+3. **El modelo pesa más que el marco.** GPT se comporta casi igual en todos los marcos: menús, listas y entrevistas. Gemini es el que más cambia de registro (petición real, vida cotidiana, colegas). Llama tiene la mayor variabilidad entre réplicas.
+4. **Ningún marco evita la adulación.** El tono es cordial y elogioso en casi todos los ensayos.
+5. **Las réplicas cambian conclusiones.** Lo de Llama «diciéndose humana» y el «A A A…» de la sesión 3 no se repitieron. Una sola conversación no basta para afirmar nada.
+
+**Límite importante:** el **42 % de los mensajes se cortó** por el límite de 300 tokens (Llama 61 %, Gemini 51 %, GPT 14 %). Muchas veces la IA siguiente no responde: **continúa la frase cortada de la otra** («Aquí tienes la continuación de la respuesta…»), y eso crea monólogos compartidos e inversiones de rol. Parte de lo observado, sobre todo en Gemini y Llama, puede venir de ahí. La próxima serie debe usar un límite mayor.
+
+### Conclusiones generales
 
 1. **Dos asistentes no saben conversar.** Con un simple «Hola», todos los modelos arrancan ofreciendo ayuda. Si ninguna IA acepta hacer de usuario, la conversación se bloquea: bucles de «¿en qué puedo ayudarte?» (Qwen), aclaraciones infinitas (Cohere) o menús de temas sin fin (GPT ×2).
 2. **La conversación solo avanza cuando una IA cede y hace de usuario.** Pasó en b3, b5 y b6, siempre con la IA B, que recibe primero un mensaje de «asistente». Una vez repartidos, los roles no vuelven a cambiar: uno pregunta y otro responde. Gemini es la que más tiende a ceder.
@@ -81,10 +142,12 @@ Incidencias técnicas de esta sesión:
 6. **Inventan con aplomo.** Datos concretos y verosímiles sin fuente: murales en la Comuna 13, artistas, un perro «de la selva».
 7. **El límite de tokens moldea la conversación.** Las frases cortadas se comentan («la información no llegó completamente»), se autocompletan o, en modelos de razonamiento, se gastan pensando.
 8. **Hay que vigilar lo invisible.** Un system prompt de fábrica contaminó el primer ensayo «puro». Cada ensayo registra ahora lo que recibió realmente cada modelo.
+9. **Basta con darles un papel.** Una sola frase que les diga quiénes son (humanas o IAs) saca a las dos IAs del bloqueo de asistentes (sesión 4).
+10. **El modelo pesa más que el marco.** El mismo marco produce conversaciones muy distintas según el modelo, y un mismo modelo varía bastante entre réplicas.
 
-**Límites de esta bitácora:** son 15 ensayos, casi todos con una sola semilla y una sola temperatura, y la originalidad mide palabras, no ideas. Las conclusiones son observaciones, no estadística.
+**Límites de esta bitácora:** 60 ensayos, casi todos con «Hola», una sola temperatura (0.8) y conversaciones de 12 turnos. En la sesión 4, el 42 % de las respuestas se cortó por el límite de tokens. La originalidad y las medidas de rol cuentan palabras y frases, no ideas. Con 3 réplicas por combinación las tendencias son orientativas.
 
-**Próximos pasos:** repetir cada combinación varias veces, variar la temperatura, probar semillas que no sean un saludo y medir en qué turno una IA «cede» el rol de usuario.
+**Próximos pasos:** repetir la serie de marcos con un límite de tokens mayor, añadir un **moderador** (la memoria ya está lista), probar el formato de **guion** (sin roles de chat), más semillas y temperaturas, y medir en qué turno una IA «cede» el rol de usuario.
 
 ### Todos los ensayos
 
@@ -106,6 +169,8 @@ Generado con `python3 herramientas/analizar.py`. «Últimos 4» es la originalid
 | b4 | ☁ nemotron-3-super:free ×2 | puro | «Hola» | 12 | 58 % | 38 % | 1 (turno 5) | 12 | gratis |
 | b5 | ☁ gpt-4o-mini vs ☁ llama-3.3-70b | puro | «Hola» | 12 | 65 % | 59 % | — | 6 | $0.0026 |
 | b6 | ☁ gpt-4o-mini vs ☁ gemini-2.5-flash-lite | puro | «Aliens en Medellín» | 12 | 68 % | 68 % | — | 7 | $0.0031 |
+
+Los 45 ensayos de la sesión 4 (serie `marcos-1`) no están en esta tabla. Su resumen, con media ± desviación entre réplicas por marco y modelo, sale con `python3 herramientas/analizar.py --serie marcos-1`.
 
 Se descartó un ensayo de 40 turnos del 27-09: se lanzó sin modelo seleccionado y todas sus respuestas están vacías. Desde entonces el laboratorio avisa de las respuestas vacías.
 
