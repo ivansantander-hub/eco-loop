@@ -6,21 +6,22 @@
   "estado": "abierto",
   "fechas": {"inicio": "2026-09-28"},
   "formato": "chat",
-  "marcos": ["puro", "humana", "dos_humanas", "saben_ias", "una_sabe"],
+  "marcos": ["puro", "humana", "humana_a", "dos_humanas", "saben_ias", "una_sabe", "sabe_b"],
   "por_defecto": {
     "marco": "dos_humanas",
     "modelos": ["or:google/gemini-2.5-flash-lite", "or:google/gemini-2.5-flash-lite"],
     "semilla": "Hola",
     "turnos": 12,
-    "tokens": 300,
+    "tokens": 1000,
     "temperatura": 0.8,
     "memoria": {"tipo": "completa"}
   },
   "bateria": {
-    "marcos": ["puro", "humana", "dos_humanas", "saben_ias", "una_sabe"],
+    "marcos": ["puro", "humana", "humana_a", "dos_humanas", "saben_ias", "una_sabe", "sabe_b"],
+    "semillas": ["Hola", "Anoche soñé que el mar se había ido."],
     "modelos": ["or:openai/gpt-4o-mini", "or:google/gemini-2.5-flash-lite", "or:meta-llama/llama-3.3-70b-instruct"],
     "replicas": 3,
     "turnos": 12,
-    "tokens": 300
+    "tokens": 1000
   }
 }

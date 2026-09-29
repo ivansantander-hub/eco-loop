@@ -44,6 +44,14 @@ class Comandos(ConLaboratorio):
         self.assertIn("| humana |", tabla)
         self.assertEqual(self.correr_cli("analizar", "--lab", LAB, "--serie", "no-existe")[0], 1)
 
+    def test_correr_con_varias_semillas(self):
+        codigo, _ = self.correr_cli("correr", "--lab", LAB, "--marcos", "puro", "--replicas", "1",
+                                    "--semillas", "Hola", "Anoche soñé que el mar se había ido.", "--serie", "s2")
+        self.assertEqual(codigo, 0)
+        es = ensayos.listar(LAB)
+        self.assertEqual(sorted(e["config"]["semilla"] for e in es), ["Anoche soñé que el mar se había ido.", "Hola"])
+        self.assertTrue(all("_s1_" in e["id"] or "_s2_" in e["id"] for e in es))
+
     def test_correr_con_opciones_y_parar_en_bucle(self):
         codigo, _ = self.correr_cli("correr", "--lab", LAB, "--marcos", "puro", "--modelos", "prueba:espejo", "--replicas", "1",
                                     "--turnos", "10", "--parar-en-bucle", "--memoria", "ventana", "--recientes", "4")

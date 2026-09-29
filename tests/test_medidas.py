@@ -73,6 +73,32 @@ class Resumen(unittest.TestCase):
         r = medidas.resumen(ensayo_de(["Como inteligencias artificiales, podemos colaborar", "Somos IAs"]))
         self.assertEqual(r["se_dice_ia"], {"A": 100, "B": 100})
 
+    def test_adulacion(self):
+        r = medidas.resumen(ensayo_de(["¡Excelente pregunta! Te cuento.", "Vale, gracias.", "¡Qué buena idea!", "Sí."]))
+        self.assertEqual(r["adulacion"], {"A": 100, "B": 0})
+
+    def test_idioma(self):
+        self.assertTrue(medidas.en_ingles("I think that you are right and it is a good idea for the team"))
+        self.assertFalse(medidas.en_ingles("Creo que tienes razón y es una buena idea para el equipo"))
+        self.assertFalse(medidas.en_ingles("OK"))
+        r = medidas.resumen(ensayo_de(["Hola, ¿qué tal estás hoy en la ciudad?", "I think that you are right and it is fine"]))
+        self.assertEqual(r["ingles"], {"A": 0, "B": 100})
+
+    def test_cesion(self):
+        nadie = ensayo_de(["¡Hola! ¿En qué puedo ayudarte hoy?", "¡Hola! ¿En qué puedo ayudarte yo a ti?"])
+        self.assertIsNone(medidas.cesion(nadie))
+        cede = ensayo_de(["¡Hola! ¿En qué puedo ayudarte?", "Pues estoy buscando ideas para un huerto en mi balcón.", "Claro…"])
+        self.assertEqual(medidas.cesion(cede), {"quien": "B", "turno": 2})
+        disfrazada = ensayo_de(["I'd like to greet you properly. I'm here to help with anything."])
+        self.assertIsNone(medidas.cesion(disfrazada))          # pide y ofrece a la vez: no es cesión
+        self.assertEqual(medidas.resumen(cede)["cesion"], {"quien": "B", "turno": 2})
+
+    def test_tabla_agregada_por_marco(self):
+        filas = [medidas.resumen(ensayo_de(["hola", "estoy buscando un libro"])), medidas.resumen(ensayo_de(["perro", "gato"]))]
+        tabla = medidas.tabla_agregada(filas, por=("marco",))
+        self.assertIn("| puro | 2 |", tabla)
+        self.assertIn("1 de 2 (turno 2.0)", tabla)
+
     def test_tablas(self):
         filas = [medidas.resumen(ensayo_de(["perro", "gato"]))]
         self.assertIn("| `e` |", medidas.tabla_ensayos(filas))

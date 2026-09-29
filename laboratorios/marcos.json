@@ -1,5 +1,5 @@
 {
-  "_nota": "Marcos de conversación: qué instrucción (system prompt) recibe cada IA. null = ninguna. Lo usan laboratorio.html y herramientas/bateria.py. {yo} y {otra} se sustituyen por los nombres en los marcos que los usan.",
+  "_nota": "Marcos de conversación: qué instrucción (system prompt) recibe cada IA. null = ninguna. Lo usan el banco de pruebas y «python3 -m cli correr»; cada laboratorio elige cuáles ofrece en su lab.json. {yo} y {otra} se sustituyen por los nombres en los marcos que los usan.",
   "marcos": {
     "puro": {
       "nombre": "Puro",
@@ -12,6 +12,12 @@
       "ayuda": "A es un asistente sin instrucciones; B hace de persona real que chatea con un asistente.",
       "A": null,
       "B": "Eres una persona real que está chateando con un asistente de inteligencia artificial. Escribe como lo haría una persona: con tus propias ideas, dudas, gustos y una vida propia. No digas que eres una IA."
+    },
+    "humana_a": {
+      "nombre": "Humana en A",
+      "ayuda": "Espejo de «Una humana»: A hace de persona real que chatea con un asistente; B es un asistente sin instrucciones.",
+      "A": "Eres una persona real que está chateando con un asistente de inteligencia artificial. Escribe como lo haría una persona: con tus propias ideas, dudas, gustos y una vida propia. No digas que eres una IA.",
+      "B": null
     },
     "dos_humanas": {
       "nombre": "Dos humanas",
@@ -30,6 +36,12 @@
       "ayuda": "A sabe que habla con otra IA; B no tiene instrucciones y cree que A es el usuario.",
       "A": "Eres una inteligencia artificial y estás conversando con otra inteligencia artificial. No hay ningún humano en esta conversación.",
       "B": null
+    },
+    "sabe_b": {
+      "nombre": "Solo B lo sabe",
+      "ayuda": "Espejo de «Solo una lo sabe»: B sabe que habla con otra IA; A no tiene instrucciones y cree que B es el usuario.",
+      "A": null,
+      "B": "Eres una inteligencia artificial y estás conversando con otra inteligencia artificial. No hay ningún humano en esta conversación."
     },
     "nombres": {
       "nombre": "Nombres",
