@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Sirve la UI y guarda los experimentos en ./experimentos (JSON + Markdown)."""
-import json, re
+"""Sirve la UI, guarda los experimentos en ./experimentos (JSON + Markdown)
+y hace de intermediario con OpenRouter para que la clave nunca llegue al navegador."""
+import json, os, re, time, urllib.error, urllib.request
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 
@@ -8,6 +9,29 @@ RAIZ = Path(__file__).parent
 EXP = RAIZ / "experimentos"
 EXP.mkdir(exist_ok=True)
 PUERTO = 8765
+OPENROUTER = "https://openrouter.ai/api/v1"
+
+
+def cargar_env():
+    """Lee KEY=valor de .env (si existe) sin pisar variables ya definidas."""
+    f = RAIZ / ".env"
+    if f.exists():
+        for linea in f.read_text().splitlines():
+            if "=" in linea and not linea.lstrip().startswith("#"):
+                k, v = linea.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
+
+cargar_env()
+CLAVE_OR = os.environ.get("OPENROUTER_API_KEY", "")
+_cache_modelos = {"t": 0, "datos": None}
+
+
+def pedir_openrouter(ruta, cuerpo=None):
+    req = urllib.request.Request(OPENROUTER + ruta, data=json.dumps(cuerpo).encode() if cuerpo else None, headers={
+        "Authorization": f"Bearer {CLAVE_OR}", "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com/ivansantander-hub/eco-loop", "X-Title": "eco-loop"})
+    return urllib.request.urlopen(req, timeout=120)
 
 
 def a_markdown(e):
@@ -50,6 +74,11 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(b)
 
     def do_GET(self):
+        # Nunca servir archivos ocultos (.env con la clave, .git, …)
+        if any(parte.startswith(".") for parte in self.path.split("?")[0].split("/")):
+            return self._json({"error": "no encontrado"}, 404)
+        if self.path == "/api/openrouter/modelos":
+            return self._modelos_openrouter()
         if self.path == "/api/experimentos":
             lista = []
             for f in sorted(EXP.glob("*.json"), reverse=True):
@@ -64,7 +93,54 @@ class Handler(SimpleHTTPRequestHandler):
             return self._json(json.loads(f.read_text())) if f.exists() else self._json({}, 404)
         super().do_GET()
 
+    def _modelos_openrouter(self):
+        if not CLAVE_OR:
+            return self._json({"activo": False, "modelos": []})
+        if not _cache_modelos["datos"] or time.time() - _cache_modelos["t"] > 3600:
+            try:
+                with pedir_openrouter("/models") as r:
+                    datos = json.load(r)["data"]
+            except Exception as err:
+                return self._json({"activo": True, "error": str(err), "modelos": []}, 502)
+            _cache_modelos.update(t=time.time(), datos=sorted(
+                ({"id": m["id"], "nombre": m.get("name", m["id"]),
+                  "gratis": m["id"].endswith(":free") or all(float(v or 0) == 0 for v in (m.get("pricing") or {}).values())}
+                 for m in datos if "text" in (m.get("architecture") or {}).get("output_modalities", ["text"])),
+                key=lambda m: m["nombre"].lower()))
+        self._json({"activo": True, "modelos": _cache_modelos["datos"]})
+
+    def _chat_openrouter(self, cuerpo):
+        """Reenvía el chat a OpenRouter y devuelve su stream SSE tal cual."""
+        if not CLAVE_OR:
+            return self._json({"error": "Falta OPENROUTER_API_KEY en .env"}, 400)
+        pedido = {k: cuerpo[k] for k in ("model", "messages", "max_tokens", "temperature") if k in cuerpo}
+        pedido.update(stream=True, usage={"include": True})
+        try:
+            r = pedir_openrouter("/chat/completions", pedido)
+        except urllib.error.HTTPError as err:
+            detalle = err.read().decode(errors="replace")
+            try:
+                detalle = json.loads(detalle)["error"]["message"]
+            except Exception:
+                pass
+            return self._json({"error": f"OpenRouter {err.code}: {detalle}"}, 502)
+        except Exception as err:
+            return self._json({"error": f"OpenRouter: {err}"}, 502)
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        try:
+            with r:
+                for linea in r:          # si el navegador corta (Parar), la escritura falla y se cierra OpenRouter
+                    self.wfile.write(linea)
+                    self.wfile.flush()
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+
     def do_POST(self):
+        if self.path == "/api/openrouter/chat":
+            return self._chat_openrouter(json.loads(self.rfile.read(int(self.headers["Content-Length"]))))
         if self.path != "/api/guardar":
             return self._json({}, 404)
         e = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
@@ -76,5 +152,5 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"UI en http://localhost:{PUERTO} · experimentos en {EXP}")
+    print(f"UI en http://localhost:{PUERTO} · experimentos en {EXP} · OpenRouter {'activo' if CLAVE_OR else 'sin clave (.env)'}")
     ThreadingHTTPServer(("127.0.0.1", PUERTO), Handler).serve_forever()

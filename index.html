@@ -307,20 +307,36 @@ let estado = "quieto";          // quieto | corriendo | pausando
 let ctrl = null, pausaPedida = false;
 
 // ---------- Modelos ----------
+// Los modelos de OpenRouter llevan el prefijo "or:"; la llamada pasa por servidor.py, que guarda la clave.
+const esOR = id => id.startsWith("or:");
+const nombreModelo = id => esOR(id) ? "☁ " + id.slice(3) : id.replace(/^huihui_ai\//, "");
+
 async function cargarModelos() {
+  const grupos = [], avisos = [];
   try {
     const { models } = await (await fetch(OLLAMA + "/api/tags")).json();
     await Promise.all(models.map(async m => {
       const info = await (await fetch(OLLAMA + "/api/show", { method: "POST", body: JSON.stringify({ model: m.name }) })).json();
       integrado[m.name] = info.system || null;
     }));
-    document.querySelectorAll(".modelos").forEach(s => s.innerHTML = models.map(m => `<option>${esc(m.name)}</option>`).join(""));
-    modelosPorDefecto();
-  } catch { setEstado("No conecto con Ollama en localhost:11434. ¿Está abierto?"); }
+    grupos.push(`<optgroup label="Ollama · en tu equipo">${models.map(m => `<option value="${esc(m.name)}">${esc(m.name)}</option>`).join("")}</optgroup>`);
+  } catch { avisos.push("Ollama no responde en localhost:11434"); }
+  try {
+    const or = await (await fetch("/api/openrouter/modelos")).json();
+    if (or.activo && or.modelos.length) {
+      const opcion = m => { integrado["or:" + m.id] = null; return `<option value="or:${esc(m.id)}">${esc(m.nombre)}</option>`; };
+      grupos.push(`<optgroup label="OpenRouter · gratis">${or.modelos.filter(m => m.gratis).map(opcion).join("")}</optgroup>`);
+      grupos.push(`<optgroup label="OpenRouter · de pago">${or.modelos.filter(m => !m.gratis).map(opcion).join("")}</optgroup>`);
+    } else if (or.error) avisos.push("OpenRouter: " + or.error);
+  } catch { avisos.push("OpenRouter no disponible"); }
+  document.querySelectorAll(".modelos").forEach(s => s.innerHTML = grupos.join(""));
+  if (avisos.length) setEstado(avisos.join(" · "));
+  modelosPorDefecto();
 }
 function modelosPorDefecto() {
   const n = Object.keys(integrado);
-  const def = modo === "puro" ? n.find(x => !integrado[x]) : (n.find(x => x.startsWith("qwen-es")) || n[0]);
+  const locales = n.filter(x => !esOR(x));
+  const def = modo === "puro" ? (locales.find(x => !integrado[x]) || n[0]) : (locales.find(x => x.startsWith("qwen-es")) || locales[0] || n[0]);
   if (def && !exp) { $("modA").value = def; $("modB").value = def; }
   chips();
 }
@@ -328,7 +344,8 @@ function chips() {
   for (const k of ["A", "B"]) {
     const sys = integrado[$("mod" + k).value], chip = $("chip" + k), sustituido = modo !== "puro";
     chip.className = "estado-ia" + (sys && !sustituido ? " warn" : "");
-    chip.textContent = !sys ? "✓ Sin instrucciones ocultas"
+    chip.textContent = esOR($("mod" + k).value) ? "☁ Vía OpenRouter · sin instrucciones de Ollama; se paga por uso"
+      : !sys ? "✓ Sin instrucciones ocultas"
       : sustituido ? "Sus instrucciones de fábrica se reemplazan por las tuyas"
       : "⚠ Trae instrucciones ocultas: el ensayo no será puro";
     chip.title = chip.textContent + (sys ? "\n\nInstrucciones de fábrica: " + sys : "");
@@ -393,7 +410,7 @@ function bloquearConfig(si) {
   $("resumen").hidden = !si;
   if (!si || !exp) return;
   const c = exp.config, [a, b] = c.ias;
-  const modelo = ia => ia.modelo.replace(/^huihui_ai\//, "");
+  const modelo = ia => nombreModelo(ia.modelo);
   $("resumen").innerHTML = [
     `Primer mensaje <b>«${esc(c.semilla)}»</b>`,
     `<span class="va">●</span> <b>${esc(a.etiqueta)}</b> ${esc(modelo(a))}`,
@@ -416,7 +433,7 @@ function nodoTurno(k) {
 }
 function rellenarTurno(n, k) {
   const m = exp.mensajes[k], prev = previoDe(exp, k), o = originalidad(m.texto, prev);
-  n.voz.querySelector(".quien").innerHTML = `${esc(m.etiqueta)}<small>${m.tokens ?? "?"} tok · ${m.segundos}s</small>`;
+  n.voz.querySelector(".quien").innerHTML = `${esc(m.etiqueta)}<small>${m.tokens ?? "?"} tok · ${m.segundos}s${m.costo != null ? " · $" + m.costo.toFixed(5) : ""}</small>`;
   pintarEn(n.voz.querySelector(".txt"), m.texto, prev, m.autor);
   n.eje.querySelector(".pct").textContent = o == null ? "–" : o + "%";
   n.voz.querySelector(".notas").innerHTML = banderas(exp, k)
@@ -454,6 +471,7 @@ function renderInstrumentos() {
     [media == null ? "–" : media + "%", "originalidad media"],
     [tok.toLocaleString("es"), "tokens"],
     [seg ? (tok / seg).toFixed(1) : "–", "tokens/s"],
+    ...(ms.some(m => m.costo != null) ? [["$" + ms.reduce((a, m) => a + (m.costo || 0), 0).toFixed(4), "coste en OpenRouter"], [ms.filter(m => m.costo != null).length, "mensajes de pago"]] : []),
   ].map(([b, t]) => `<div><b>${b}</b><span>${t}</span></div>`).join("");
   // Alertas
   const al = [];
@@ -541,6 +559,53 @@ async function nuevoEnBlanco() {
 }
 
 // ---------- Conversación ----------
+// Lee un stream línea a línea y llama a alLinea con cada una.
+async function leerLineas(r, alLinea) {
+  const reader = r.body.getReader(), dec = new TextDecoder();
+  let buf = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const lineas = buf.split("\n"); buf = lineas.pop();
+    lineas.forEach(l => l.trim() && alLinea(l.trim()));
+  }
+  if (buf.trim()) alLinea(buf.trim());
+}
+
+// Genera una respuesta con Ollama o con OpenRouter; alTexto recibe el texto acumulado mientras llega.
+async function generar(modelo, messages, signal, alTexto) {
+  const c = exp.config;
+  let texto = "", tokens = null, cortado = false, costo = null;
+  if (esOR(modelo)) {
+    const r = await fetch("/api/openrouter/chat", { method: "POST", signal, headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: modelo.slice(3), messages, max_tokens: c.num_predict, temperature: c.temperature }) });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `OpenRouter respondió ${r.status}`);
+    await leerLineas(r, l => {
+      if (!l.startsWith("data:")) return;              // comentarios de OpenRouter (": PROCESSING")
+      const d = l.slice(5).trim();
+      if (d === "[DONE]") return;
+      const j = JSON.parse(d);
+      if (j.error) throw new Error("OpenRouter: " + (j.error.message || JSON.stringify(j.error)));
+      const ch = j.choices?.[0];
+      if (ch?.delta?.content) { texto += ch.delta.content; alTexto(texto); }
+      if (ch?.finish_reason) cortado = ch.finish_reason === "length";
+      if (j.usage) { tokens = j.usage.completion_tokens ?? null; costo = j.usage.cost ?? null; }
+    });
+  } else {
+    const r = await fetch(OLLAMA + "/api/chat", { method: "POST", signal,
+      body: JSON.stringify({ model: modelo, messages, stream: true, think: false, keep_alive: "10m",
+        options: { num_predict: c.num_predict, temperature: c.temperature, num_ctx: c.num_ctx } }) });
+    await leerLineas(r, l => {
+      const j = JSON.parse(l);
+      if (j.error) throw new Error(j.error);
+      if (j.message?.content) { texto += j.message.content; alTexto(texto); }
+      if (j.done) { tokens = j.eval_count ?? null; cortado = j.done_reason === "length"; }
+    });
+  }
+  return { texto, tokens, cortado, costo };
+}
+
 async function turno() {
   const k = exp.mensajes.length, i = k % 2, ia = exp.config.ias[i];
   const messages = [];
@@ -555,40 +620,23 @@ async function turno() {
   txt.classList.add("cursor");
   ctrl = new AbortController();
   const t0 = performance.now();
-  let texto = "", final = {};
+  let res;
   try {
-    const r = await fetch(OLLAMA + "/api/chat", {
-      method: "POST", signal: ctrl.signal,
-      body: JSON.stringify({ model: ia.modelo, messages, stream: true, think: false, keep_alive: "10m",
-        options: { num_predict: exp.config.num_predict, temperature: exp.config.temperature, num_ctx: exp.config.num_ctx } }),
-    });
-    const reader = r.body.getReader(), dec = new TextDecoder();
-    let buf = "";
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      const lineas = buf.split("\n"); buf = lineas.pop();
-      for (const l of lineas) {
-        if (!l.trim()) continue;
-        const c = JSON.parse(l);
-        if (c.error) throw new Error(c.error);
-        texto += c.message?.content || "";
-        if (c.done) final = c;
-      }
+    res = await generar(ia.modelo, messages, ctrl.signal, texto => {
       const seguir = alFondo();   // solo sigue el texto si estabas al final; si subiste, te deja leer
       pintarEn(txt, texto, prev, i);
       if (seguir) part.scrollTop = part.scrollHeight;
       botonEnVivo();
-    }
+    });
   } catch (err) {
     nodo.eje.remove(); nodo.voz.remove();   // el turno a medias no se guarda
     throw err;
   }
   exp.mensajes.push({
-    autor: i, etiqueta: ia.etiqueta, modelo: ia.modelo, texto: texto.trim(),
-    hora: new Date().toISOString(), tokens: final.eval_count ?? null,
-    segundos: +((performance.now() - t0) / 1000).toFixed(1), cortado: final.done_reason === "length",
+    autor: i, etiqueta: ia.etiqueta, modelo: ia.modelo, texto: res.texto.trim(),
+    hora: new Date().toISOString(), tokens: res.tokens,
+    segundos: +((performance.now() - t0) / 1000).toFixed(1), cortado: res.cortado,
+    ...(res.costo != null ? { costo: res.costo } : {}),
   });
   txt.classList.remove("cursor");
   rellenarTurno(nodo, k);

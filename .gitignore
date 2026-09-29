@@ -15,3 +15,6 @@ experimentos/*
 
 # Página generada: se reconstruye con `python3 publicar/construir.py`
 publicar/Dos espejos.html
+
+# Claves locales (nunca al repo)
+.env
