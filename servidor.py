@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
-"""Sirve la UI, guarda los experimentos en ./experimentos (JSON + Markdown)
-y hace de intermediario con OpenRouter para que la clave nunca llegue al navegador."""
-import json, os, re, time, urllib.error, urllib.request
+"""Sirve eco loop: el informe en «/» y el laboratorio en «/laboratorio».
+
+Guarda los experimentos en ./experimentos (JSON + Markdown) y hace de intermediario
+con OpenRouter para que la clave nunca llegue al navegador."""
+import json, os, re, sys, time, urllib.error, urllib.request
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 
-RAIZ = Path(__file__).parent
-EXP = RAIZ / "experimentos"
+RAIZ = Path(__file__).resolve().parent
+sys.path.insert(0, str(RAIZ / "publicar"))
+import construir  # noqa: E402  (arma el informe)
+
+EXP = Path(os.environ.get("EXPERIMENTOS", RAIZ / "experimentos"))
 EXP.mkdir(exist_ok=True)
-PUERTO = 8765
+PUERTO = int(os.environ.get("PUERTO", 8765))
 OPENROUTER = "https://openrouter.ai/api/v1"
 
 
@@ -73,10 +78,24 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b)
 
+    def _html(self, texto):
+        b = texto.encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(b)))
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(b)
+
     def do_GET(self):
         # Nunca servir archivos ocultos (.env con la clave, .git, …)
         if any(parte.startswith(".") for parte in self.path.split("?")[0].split("/")):
             return self._json({"error": "no encontrado"}, 404)
+        ruta = self.path.split("?")[0]
+        if ruta in ("/", "/index.html"):  # el informe, armado en vivo con los ensayos publicados
+            return self._html(construir.generar_html(EXP, con_laboratorio=True))
+        if ruta in ("/laboratorio", "/laboratorio/"):
+            return self._html((RAIZ / "laboratorio.html").read_text())
         if self.path == "/api/openrouter/modelos":
             return self._modelos_openrouter()
         if self.path == "/api/experimentos":
@@ -152,5 +171,6 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"UI en http://localhost:{PUERTO} · experimentos en {EXP} · OpenRouter {'activo' if CLAVE_OR else 'sin clave (.env)'}")
+    print(f"Informe en http://localhost:{PUERTO} · laboratorio en http://localhost:{PUERTO}/laboratorio · "
+          f"OpenRouter {'activo' if CLAVE_OR else 'sin clave (.env)'}")
     ThreadingHTTPServer(("127.0.0.1", PUERTO), Handler).serve_forever()

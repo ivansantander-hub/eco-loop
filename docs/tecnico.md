@@ -5,15 +5,17 @@ Cómo está construido eco-loop y qué decisiones hay detrás. Para el experimen
 ## Arquitectura
 
 ```
-navegador (index.html)
-   │  ├── Ollama ──────────────► http://localhost:11434/api/chat   (directo, streaming NDJSON)
-   │  └── /api/openrouter/chat ─► servidor.py ─► openrouter.ai     (proxy, streaming SSE)
-   │
-   └── /api/guardar, /api/experimentos ─► servidor.py ─► experimentos/*.json + *.md
+/              ─► servidor.py arma el informe: publicar/plantilla.html + textos.json + ensayos marcados
+/laboratorio   ─► laboratorio.html
+                    ├── Ollama ──────────────► http://localhost:11434/api/chat   (directo, streaming NDJSON)
+                    ├── /api/openrouter/chat ─► servidor.py ─► openrouter.ai     (proxy, streaming SSE)
+                    └── /api/guardar, /api/experimentos ─► servidor.py ─► experimentos/*.json + *.md
 ```
 
-- **`index.html`**: todo el laboratorio en un archivo (HTML, CSS y JS, sin dependencias ni build). Solo carga tipografías de Google Fonts.
-- **`servidor.py`**: biblioteca estándar de Python (`http.server`). Sirve la página, guarda y lista ensayos, y hace de intermediario con OpenRouter.
+- **`laboratorio.html`**: todo el laboratorio en un archivo (HTML, CSS y JS, sin dependencias ni build). Solo carga tipografías de Google Fonts.
+- **`publicar/plantilla.html`**: el informe. Lleva marcadores (`__DATOS__`, `__TEXTOS__`, `__CON_LABORATORIO__`) que `publicar/construir.py` rellena. El servidor lo hace en cada visita a `/`; el comando `python3 publicar/construir.py` lo hace una vez y guarda una copia estática, sin enlace al laboratorio.
+- **Qué ensayos entran en el informe:** los marcados «En el informe» en el laboratorio (`"publicar": true`). Si no hay ninguno, los de `orden` en `textos.json`. Si tampoco existen (por ejemplo, en un clon del repo), todos los que haya. El título y la lectura de cada ensayo salen de `textos.json`, y los que no tienen texto usan uno genérico.
+- **`servidor.py`**: biblioteca estándar de Python (`http.server`). Sirve las dos páginas, guarda y lista ensayos, y hace de intermediario con OpenRouter. Variables opcionales: `PUERTO` (8765 por defecto) y `EXPERIMENTOS` (carpeta de ensayos).
 - **Ollama** acepta peticiones del navegador desde `localhost` (CORS por defecto), por eso el navegador lo llama directamente.
 - **OpenRouter** pasa por el servidor para que la clave no llegue nunca al navegador.
 
@@ -77,7 +79,7 @@ Cada ensayo se guarda en `experimentos/<id>.json` y se reescribe tras cada turno
   "id": "2026-09-27_024454_puro",
   "inicio": "2026-09-27T07:44:54Z",
   "notas": "texto libre del cuaderno",
-  "publicar": false,                       // entra o no en la página pública
+  "publicar": false,                       // «En el informe»: aparece o no en la portada
   "config": {
     "modo": "puro | nombres | personalidad",
     "semilla": "Hola",                     // primer mensaje, lo recibe la IA A
@@ -99,7 +101,7 @@ Cada ensayo se guarda en `experimentos/<id>.json` y se reescribe tras cada turno
 
 ## Medidas
 
-Se calculan igual en `index.html`, en `publicar/plantilla.html` y en `herramientas/analizar.py`.
+Se calculan igual en `laboratorio.html`, en `publicar/plantilla.html` y en `herramientas/analizar.py`.
 
 - **Palabras con contenido:** minúsculas, sin puntuación, más de 2 letras y sin palabras vacías (artículos, preposiciones, pronombres…).
 - **Originalidad de un mensaje:** porcentaje de sus palabras con contenido que no estaban en el mensaje inmediatamente anterior de la otra IA. Para el primer turno se compara con el primer mensaje. 0 % significa que solo devuelve lo que recibió.
@@ -127,11 +129,11 @@ Limitación: la originalidad compara palabras, no ideas. Una paráfrasis puntúa
 
 | Comando | Qué hace |
 |---|---|
-| `./abrir.sh` | Arranca `servidor.py` en http://localhost:8765 y abre el navegador |
+| `./abrir.sh` | Arranca `servidor.py` en http://localhost:8765 (informe en `/`, laboratorio en `/laboratorio`) y abre el navegador |
 | `python3 charla.py "tema" -t 20` | Conversación en la terminal, solo Ollama |
 | `python3 herramientas/bateria.py` | Lanza en paralelo la batería de ensayos de OpenRouter definida en el script (necesita el servidor en marcha) |
 | `python3 herramientas/analizar.py [filtro]` | Tabla Markdown con las medidas de todos los ensayos |
-| `python3 publicar/construir.py` | Genera `publicar/eco-loop.html` con los ensayos marcados como «En la página pública» |
+| `python3 publicar/construir.py` | Exporta el informe a `publicar/eco-loop.html` (copia estática, sin laboratorio) |
 
 ## Seguridad
 

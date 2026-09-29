@@ -119,8 +119,13 @@ Solo el ensayo III está en el repositorio como ejemplo. El resto se queda en el
 
 ```sh
 cp .env.example .env          # opcional: pon tu clave de OpenRouter en .env
-./abrir.sh                    # abre el laboratorio en http://localhost:8765
+./abrir.sh                    # abre eco loop en http://localhost:8765
 ```
+
+La app tiene dos partes, con un menú para pasar de una a otra:
+
+- **Informe** (`/`): la portada. Muestra los ensayos que marques con **«En el informe»**, con su gráfica de originalidad, cada conversación como partitura y un botón **▶ Reproducir**. Se arma en vivo: al marcar un ensayo, aparece al recargar.
+- **Laboratorio** (`/laboratorio`): donde se lanzan y observan los ensayos.
 
 En el laboratorio:
 
@@ -137,6 +142,6 @@ Otras herramientas:
 | `python3 charla.py "tema" -t 20` | Conversación en la terminal (solo Ollama) |
 | `python3 herramientas/bateria.py` | Batería de ensayos comparativos en OpenRouter |
 | `python3 herramientas/analizar.py` | Tabla con las medidas de todos tus ensayos |
-| `python3 publicar/construir.py` | Página pública de eco loop con los ensayos marcados |
+| `python3 publicar/construir.py` | Exporta el informe como un solo archivo, `publicar/eco-loop.html`, para compartirlo sin servidor |
 
 La clave de OpenRouter se queda en `.env`, fuera del repositorio, y nunca llega al navegador. Arquitectura, formato de datos, medidas y seguridad: [`docs/tecnico.md`](docs/tecnico.md).

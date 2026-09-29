@@ -33,11 +33,20 @@
   .va { color: var(--a); } .vb { color: var(--b); }
 
   /* ---------- Portada ---------- */
-  header { padding-top: clamp(48px, 9vw, 112px); display: grid; gap: 28px; }
-  .titulo { font: 800 clamp(64px, 14vw, 184px)/.86 var(--display); letter-spacing: -.045em; margin: 0; }
-  .reflejo { font: 800 clamp(64px, 14vw, 184px)/.86 var(--display); letter-spacing: -.045em; transform: scaleY(-1); margin-top: -.12em; color: var(--ink); opacity: .16;
-    -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 62%); mask-image: linear-gradient(to top, #000 0%, transparent 62%);
-    animation: onda 7s ease-in-out infinite; transform-origin: top; user-select: none; }
+  .nav { max-width: 1120px; margin-inline: auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 18px; border-bottom: 1px solid var(--rule); }
+  .nav-marca { font: 800 18px/1 var(--display); letter-spacing: -.02em; color: var(--ink); text-decoration: none; }
+  .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+  .nav-links a { font: 500 12.5px var(--mono); color: var(--muted); text-decoration: none; padding: 7px 12px; border-radius: 999px; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-links a[aria-current="page"] { background: var(--ink); color: var(--paper); }
+  .nav-links a:focus-visible, .nav-marca:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+  header { padding-top: clamp(40px, 7vw, 96px); display: grid; gap: 28px; }
+  .titulo, .reflejo { font: 800 clamp(52px, 12.5vw, 168px)/.9 var(--display); letter-spacing: -.045em; white-space: nowrap; }
+  .titulo { margin: 0; }
+  /* El reflejo se voltea sobre su propio centro para quedar justo debajo del título, como en el agua */
+  .reflejo { transform: scaleY(-1); transform-origin: center; margin-top: .02em; color: var(--ink); opacity: .16;
+    -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 70%); mask-image: linear-gradient(to top, #000 0%, transparent 70%);
+    animation: onda 7s ease-in-out infinite; user-select: none; }
   @keyframes onda { 50% { transform: scaleY(-1) skewX(-2deg) translateX(4px); } }
   .lede { font-size: clamp(21px, 2.4vw, 27px); line-height: 1.45; max-width: 30ch; }
   .lede em { font-style: italic; }
@@ -136,6 +145,14 @@
   @media (prefers-reduced-motion: reduce) { .reflejo { animation: none; } .cursor::after { animation: none; } }
 </style>
 
+<nav class="nav" aria-label="Secciones">
+  <a class="nav-marca" href="./">eco loop</a>
+  <span class="nav-links">
+    <a href="./" aria-current="page">Informe</a>
+    <a href="/laboratorio" id="navLab" hidden>Laboratorio</a>
+    <a href="https://github.com/ivansantander-hub/eco-loop">Código</a>
+  </span>
+</nav>
 <div class="wrap">
   <header>
     <div class="eyebrow" id="fecha">Experimento · Ollama local</div>
@@ -143,7 +160,7 @@
       <h1 class="titulo">eco loop</h1>
       <div class="reflejo" aria-hidden="true">eco loop</div>
     </div>
-    <p class="lede">Conecté dos copias del <em>mismo</em> modelo de lenguaje para que hablaran entre ellas. Nadie más en la conversación. Esto es lo que se dijeron.</p>
+    <p class="lede">Puse a dos modelos de lenguaje a hablar entre ellos, muchas veces dos copias del <em>mismo</em>. Nadie más en la conversación. Esto es lo que se dijeron.</p>
     <dl class="ficha" id="ficha"></dl>
     <div class="leyenda">
       <span><span class="muestra a">IA A</span> habla a la izquierda, <span class="muestra b">IA B</span> a la derecha.</span>
@@ -174,6 +191,8 @@
 <script>
 const DATOS = __DATOS__;
 const TEXTOS = __TEXTOS__;
+const CON_LABORATORIO = __CON_LABORATORIO__;   // solo cuando lo sirve servidor.py; la copia estática no tiene laboratorio
+document.getElementById("navLab").hidden = !CON_LABORATORIO;
 
 const VACIAS = new Set(("a al algo algún alguna ante antes aquí así aun aunque cada como con contra cual cuando de del desde donde dos e el ella ellas ello ellos en entre era eres es esa esas ese eso esos esta está están estas este esto estos estoy fue ha han has hay he la las le les lo los más me mi mí mis muy nada ni no nos o os otra otro para pero poco por porque qué que quien se sea ser si sí sin sino sobre son soy su sus tal también te ti tan tu tú tus un una uno unos unas y ya yo the and you i to of").split(" "));
 const norm = w => w.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
@@ -256,17 +275,20 @@ function pintarEn(el, texto, previo, autor) {
 
 function ficha() {
   const todos = DATOS.flatMap(e => e.mensajes);
-  const modelos = [...new Set(DATOS.flatMap(e => e.config.ias.map(i => i.modelo)))];
+  const ids = [...new Set(DATOS.flatMap(e => e.config.ias.map(i => i.modelo)))];
+  const modelos = ids.map(m => m.replace(/^or:/, "").replace(/^huihui_ai\//, "").split("/").pop());
+  const proveedores = [ids.some(m => !m.startsWith("or:")) && "Ollama, en local", ids.some(m => m.startsWith("or:")) && "OpenRouter"].filter(Boolean);
+  const coste = todos.reduce((s, m) => s + (m.costo || 0), 0);
   const filas = [
     ["Modelos", modelos.join(" · ")],
-    ["Pesos", TEXTOS.pesos],
-    ["Dónde", TEXTOS.maquina],
+    ["Dónde corren", proveedores.join(" · ")],
     ["Ensayos", `${DATOS.length}`],
     ["Turnos", `${todos.length}`],
     ["Tokens generados", todos.reduce((s, m) => s + (m.tokens || 0), 0).toLocaleString("es")],
+    ...(coste ? [["Coste en OpenRouter", "$" + coste.toFixed(4)]] : []),
   ];
   $("#ficha").innerHTML = filas.map(([k, v]) => `<div><dt class="eyebrow">${k}</dt><dd>${esc(v)}</dd></div>`).join("");
-  $("#fecha").textContent = `Experimento · ${TEXTOS.fecha} · Ollama local`;
+  $("#fecha").textContent = `Experimento · ${TEXTOS.fecha}`;
 }
 
 function grafica(analisis) {

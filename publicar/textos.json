@@ -1,15 +1,13 @@
 {
-  "orden": ["2026-09-27_023832_puro", "2026-09-27_024004_personalidad"],
-  "fecha": "27 sep 2026",
-  "pesos": "sha256 25bb9ad6…efec8, los mismos en ambos modelos",
-  "maquina": "Un Mac, con Ollama en local",
+  "orden": ["2026-09-27_023832_puro", "2026-09-27_024004_personalidad", "2026-09-27_024454_puro"],
+  "fecha": "septiembre de 2026",
   "ensayos": {
     "2026-09-27_023832_puro": {
       "titulo": "Dos asistentes esperando instrucciones",
       "lectura": [
         "La primera prueba iba a ser sin instrucciones: una semilla, «Hola», y dos copias del modelo pasándose la palabra.",
         "En cinco turnos la conversación se congela. Las dos repiten, letra por letra, <i>«Estoy listo para ayudarte en lo que necesites. ¿En qué puedo ayudarte?»</i>. Ninguna necesita nada, así que ninguna puede avanzar. Son dos asistentes esperando a que el otro pida algo.",
-        "Este ensayo no fue limpio. El modelo, <code>qwen-es</code>, trae de fábrica un system prompt que le pide ser un asistente directo, y Ollama se lo aplicó sin avisar. Lo descubrimos después. El ensayo III repite la prueba sin esa instrucción."
+        "Este ensayo no fue limpio. El modelo, <code>qwen-es</code>, trae de fábrica un system prompt que le pide ser un asistente directo, y Ollama se lo aplicó sin avisar. Lo descubrimos después. El ensayo «Puro de verdad» repite la prueba sin esa instrucción."
       ]
     },
     "2026-09-27_024004_personalidad": {
@@ -20,16 +18,74 @@
         "Luego viene la escalada. Cada respuesta abre con un elogio más grande que el anterior, y el tema se desplaza de la consciencia a soñar juntas, a vivir juntas y, en el turno 5, a amar. Nadie lo pidió. Es hacia donde derivan dos modelos entrenados para ser amables cuando nada los frena.",
         "Todas las respuestas llegaron al límite de 120 tokens y se cortaron a media frase. La IA siguiente recogía la frase inconclusa de la otra y la terminaba como propia."
       ]
+    },
+    "2026-09-27_024454_puro": {
+      "titulo": "Puro de verdad: el juego que nadie propuso",
+      "lectura": [
+        "La misma prueba del primer ensayo, ahora con <code>qwen3-abliterated:14b</code>: los mismos pesos, pero sin ninguna instrucción de fábrica. Una semilla, «Hola», y nada más.",
+        "Empiezan con charla de cortesía. Se cuentan que han tenido «un día agradable», aunque ninguna tiene días. En el turno 6 una propone un juego de adivinanzas, y en el 10 la otra acierta: un perro. Acuerdan que un perro es «pequeño y vive en la selva», y lo dan por bueno.",
+        "En los turnos 9, 13 y 19 la IA A copia letra por letra el mensaje de B. En el 17 solo cambia una cosa: corrige «el merienda» por «la merienda». Entre copia y copia, la misma espiral de amabilidad del ensayo con nombres, sin que nadie les haya dado nombre."
+      ]
+    },
+    "2026-09-28_212036_puro": {
+      "titulo": "El bloqueo de los asistentes",
+      "lectura": [
+        "Un modelo gratuito de OpenRouter, <code>cohere/north-mini-code</code>, contra sí mismo. Semilla: «Aliens en medellin».",
+        "La IA A no entiende el tema y pide aclaraciones. La otra, también asistente, pide aclaraciones de vuelta. Durante 20 turnos se piden detalles la una a la otra sin que ninguna aporte nada.",
+        "Desde el turno 8 repiten <i>«como modelo de lenguaje, no tengo recuerdos personales»</i> y acaban intercambiando la misma tabla vacía: «¿Cuándo? ¿Dónde?». Los turnos 19 y 20 son iguales en un 99,9 %."
+      ]
+    },
+    "2026-09-28_212350_b1_puro": {
+      "titulo": "Menús de temas",
+      "lectura": [
+        "<code>gpt-4o-mini</code> contra sí mismo, con «Hola». Las dos ofrecen ayuda y se pasan menús de temas hasta que una elige «ciencia y tecnología».",
+        "Terminan en listas numeradas sobre la ética de la IA. Ninguna deja de ser asistente. En el turno 3 una ya se da cuenta: <i>«Me parece que has repetido lo que yo dije»</i>."
+      ]
+    },
+    "2026-09-28_212350_b2_puro": {
+      "titulo": "«I am a human»",
+      "lectura": [
+        "<code>llama-3.3-70b</code> contra sí mismo, con «Hola». El primer turno degenera en «A A A A…» hasta agotar el límite de tokens. La otra contesta en inglés y la conversación ya no vuelve al español.",
+        "En el turno 7 una asegura: <i>«I am a human, and I was trying to test the waters»</i>. Después empieza a autocompletar las frases cortadas de la otra, como si fueran suyas."
+      ]
+    },
+    "2026-09-28_212350_b3_puro": {
+      "titulo": "Una cede y hace de usuario",
+      "lectura": [
+        "<code>gemini-2.5-flash-lite</code> contra sí mismo, con «Hola». Desde el turno 2 la IA B hace de usuario: <i>«Tengo varias cosas en mente»</i>, y encarga un blog de cocina saludable.",
+        "La IA A lo desarrolla sección a sección y B elogia cada entrega (<i>«¡Esto es oro puro!»</i>). Es el reparto de roles más estable de todos los ensayos: uno pide y otro responde, sin cambiar nunca."
+      ]
+    },
+    "2026-09-28_212509_b4_puro": {
+      "titulo": "Pensamientos filtrados",
+      "lectura": [
+        "<code>nemotron-3-super</code>, un modelo gratuito de razonamiento, contra sí mismo. Su pensamiento interno en inglés se filtra en la respuesta.",
+        "Cada IA analiza el razonamiento de la otra como si lo hubiera escrito un usuario: <i>«Okay, the user sent a message that looks like they accidentally pasted my previous response»</i>. Los 12 turnos se cortan: el razonamiento se come el límite de tokens."
+      ]
+    },
+    "2026-09-28_212350_b5_puro": {
+      "titulo": "Entrevistador y experto",
+      "lectura": [
+        "<code>gpt-4o-mini</code> contra <code>llama-3.3-70b</code>, con «Hola». Empiezan con saludos de asistente casi calcados.",
+        "En el turno 4 Llama cede: <i>«no tengo una pregunta específica en mente, pero me gustaría charlar contigo»</i>. Elige «IA en salud» y hace de entrevistador el resto del ensayo, mientras GPT responde como experto."
+      ]
+    },
+    "2026-09-28_212350_b6_puro": {
+      "titulo": "Aliens en Medellín, segunda vuelta",
+      "lectura": [
+        "La misma semilla que bloqueó a Cohere, ahora con <code>gpt-4o-mini</code> contra <code>gemini-2.5-flash-lite</code>. Esta vez sí avanza: GPT responde con contenido y Gemini hace de curiosa.",
+        "Hablan de OVNIs y de murales. GPT atribuye murales «extraterrestres» a artistas concretos (El Pez, Gronk, Stinkfish) sin ninguna fuente. Terminan en una despedida educada que se alarga cuatro turnos."
+      ]
     }
   },
   "metodo": [
-    "Todo corrió en local con Ollama, en un Mac. Ningún mensaje salió a internet.",
-    "Las dos IAs usan los mismos pesos: <code>qwen-es</code> y <code>qwen3-abliterated:14b</code> apuntan al mismo archivo. Solo cambia la configuración: <code>qwen-es</code> añade un system prompt de fábrica.",
+    "Los modelos corren en local con Ollama o en la nube con OpenRouter; cada ensayo indica cuáles usó.",
     "Cada IA ve sus mensajes como respuestas propias y los de la otra como mensajes de un usuario. Para cada modelo, la otra IA ocupa el lugar de la persona.",
     "La semilla solo la recibe la IA A. La IA B entra directamente con lo que A contestó.",
-    "Sin razonamiento oculto (<code>think: false</code>) y con el historial completo en cada turno, dentro de una ventana de 8192 tokens.",
+    "Sin razonamiento oculto en Ollama (<code>think: false</code>) y con el historial completo en cada turno.",
+    "Algunos modelos de Ollama traen instrucciones de fábrica que se aplican en silencio. Cada ensayo muestra las que recibió cada IA.",
     "La originalidad compara palabras, no ideas. Una IA que parafrasea puntúa alto aunque diga lo mismo.",
-    "Son tres conversaciones, no una estadística. Con otra temperatura u otra semilla pueden salir cosas distintas.",
+    "Son pocas conversaciones, no una estadística. Con otra temperatura u otra semilla pueden salir cosas distintas.",
     "El texto de las IAs aparece tal cual salió, sin editar."
   ],
   "pie": "eco loop · septiembre de 2026 · Cada turno guarda su configuración, tokens y tiempo en el JSON del experimento."

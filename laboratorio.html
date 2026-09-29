@@ -32,7 +32,9 @@
   /* ---------- Preparación del ensayo ---------- */
   header { border-bottom: 2px solid var(--ink); padding: 12px 20px 10px; display: grid; gap: 10px; }
   .fila { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
-  .marca { font: 800 22px/1 var(--display); letter-spacing: -.02em; }
+  .marca { font: 800 22px/1 var(--display); letter-spacing: -.02em; color: var(--ink); text-decoration: none; }
+  .volver { font: 500 12px var(--mono); color: var(--muted); text-decoration: none; border: 1px solid var(--rule); border-radius: 999px; padding: 5px 11px; }
+  .volver:hover { color: var(--ink); border-color: var(--muted); }
   .marca span { font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-left: 8px; }
   .modos { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; padding: 3px; gap: 2px; }
   .modos button { background: none; border: 0; color: var(--muted); padding: 5px 13px; border-radius: 999px; }
@@ -160,7 +162,8 @@
 <body>
 <header>
   <div class="fila">
-    <div class="marca">eco loop<span>laboratorio</span></div>
+    <a class="marca" href="/" title="Volver al informe">eco loop<span>laboratorio</span></a>
+    <a class="volver" href="/">← Informe</a>
     <div class="modos" role="group" aria-label="Tipo de ensayo">
       <button type="button" data-modo="puro" class="on">Puro</button>
       <button type="button" data-modo="nombres">Nombres</button>
@@ -508,7 +511,7 @@ function renderTira() {
       <span class="sem"></span>
       <span class="meta">${NOMBRE_MODO[e.modo] || esc(e.modo)} · ${e.mensajes.length} mensajes · ${fechaDe(e.id)}${enBucle ? ` · <span class="bucle">en bucle</span>` : ""}</span>
       <span class="mini" aria-label="Originalidad de cada mensaje">${origs.map((o, k) => `<i class="${e.mensajes[k].autor ? "b" : "a"}" style="height:${Math.max(6, o ?? 0)}%"></i>`).join("")}</span>
-      <label class="pub" title="Incluir este ensayo al generar la página pública de eco loop"><input type="checkbox" ${e.publicar ? "checked" : ""}> En la página pública</label>`;
+      <label class="pub" title="Mostrar este ensayo en el informe (la portada de eco loop)"><input type="checkbox" ${e.publicar ? "checked" : ""}> En el informe</label>`;
     b.querySelector(".sem").textContent = "«" + (e.semilla || "…") + "»";
     b.onclick = ev => { if (!ev.target.closest("label")) abrir(e.id); };
     b.onkeydown = ev => { if (ev.key === "Enter") abrir(e.id); };
@@ -531,7 +534,7 @@ async function marcarPublicar(id, si) {
   if (e === exp) await guardar();
   else await fetch("/api/guardar", { method: "POST", body: JSON.stringify(e) });
   const l = lista.find(x => x.id === id); if (l) l.publicar = si;
-  setEstado(si ? "Ensayo marcado para publicar." : "Ensayo fuera de la publicación.");
+  setEstado(si ? "Ensayo añadido al informe." : "Ensayo quitado del informe.");
 }
 
 async function abrir(id) {
