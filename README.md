@@ -28,6 +28,8 @@ Cada laboratorio vive en `laboratorios/<id>/`: su definición (`lab.json`), su b
 
 **Próximos laboratorios:** el formato de **guion** (sin roles de chat), un **moderador** que intervenga (la memoria ya está lista), la temperatura, y buscar semillas que funcionen mejor que el sueño.
 
+El proyecto queda en pausa aquí. Las ideas para seguir están en [`docs/futuro.md`](docs/futuro.md): aplicaciones útiles (clientes sintéticos para probar asistentes, si dos IAs deciden mejor que una, un banco de pruebas de modelos), otros laboratorios y las mejoras técnicas pendientes.
+
 ---
 
 ## Cómo usarlo
