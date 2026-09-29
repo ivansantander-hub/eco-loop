@@ -1,0 +1,17 @@
+__pycache__/
+.DS_Store
+
+# Versiones anteriores de la interfaz (solo locales)
+index-v*.html
+
+# Skill de terceros: se reinstala con `npx skills add ConardLi/garden-skills@web-design-engineer` (ver skills-lock.json)
+.agents/
+.claude/skills/
+
+# Conversaciones: solo se sube un ensayo de ejemplo; el resto queda en local
+experimentos/*
+!experimentos/2026-09-27_024454_puro.json
+!experimentos/2026-09-27_024454_puro.md
+
+# Página generada: se reconstruye con `python3 publicar/construir.py`
+publicar/Dos espejos.html

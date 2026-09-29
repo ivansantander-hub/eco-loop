@@ -1,0 +1,399 @@
+<title>Dos espejos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Syne:wght@600;800&display=swap">
+<style>
+  :root {
+    --paper: #ECEEF3; --paper-2: #E1E4EC; --ink: #14161D; --muted: #5B6172; --rule: #C6CBD7;
+    --a: #2346E0; --a-soft: #D5DCFA; --b: #A86C00; --b-soft: #F1E1BF;
+    --display: "Syne", "Arial Black", sans-serif;
+    --serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --paper: #0F1117; --paper-2: #171A23; --ink: #E6E8EF; --muted: #8B91A2; --rule: #2A2F3C;
+      --a: #8299FF; --a-soft: #1C2550; --b: #E6AE48; --b-soft: #3B2D10;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #0F1117; --paper-2: #171A23; --ink: #E6E8EF; --muted: #8B91A2; --rule: #2A2F3C;
+    --a: #8299FF; --a-soft: #1C2550; --b: #E6AE48; --b-soft: #3B2D10;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font: 18px/1.6 var(--serif); padding-inline: clamp(16px, 5vw, 64px); padding-block: 0 96px; }
+  .wrap { max-width: 1120px; margin-inline: auto; display: flex; flex-direction: column; gap: 112px; }
+  .mono { font-family: var(--mono); font-size: 12.5px; letter-spacing: .02em; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  h2 { font: 800 clamp(34px, 5vw, 56px)/1 var(--display); letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+  p { margin: 0; text-wrap: pretty; }
+  .va { color: var(--a); } .vb { color: var(--b); }
+
+  /* ---------- Portada ---------- */
+  header { padding-top: clamp(48px, 9vw, 112px); display: grid; gap: 28px; }
+  .titulo { font: 800 clamp(64px, 14vw, 184px)/.86 var(--display); letter-spacing: -.045em; margin: 0; }
+  .reflejo { font: 800 clamp(64px, 14vw, 184px)/.86 var(--display); letter-spacing: -.045em; transform: scaleY(-1); margin-top: -.12em; color: var(--ink); opacity: .16;
+    -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 62%); mask-image: linear-gradient(to top, #000 0%, transparent 62%);
+    animation: onda 7s ease-in-out infinite; transform-origin: top; user-select: none; }
+  @keyframes onda { 50% { transform: scaleY(-1) skewX(-2deg) translateX(4px); } }
+  .lede { font-size: clamp(21px, 2.4vw, 27px); line-height: 1.45; max-width: 30ch; }
+  .lede em { font-style: italic; }
+  .ficha { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .ficha div { background: var(--paper); padding: 14px 16px; display: grid; gap: 4px; }
+  .ficha dt { color: var(--muted); }
+  .ficha dd { margin: 0; font-family: var(--mono); font-size: 14px; overflow-wrap: anywhere; }
+  .leyenda { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: baseline; color: var(--muted); font-size: 16px; max-width: 72ch; }
+  .leyenda b { font-weight: 500; }
+  .muestra { font-family: var(--mono); font-size: 13px; padding: 1px 6px; border-radius: 3px; }
+  .muestra.a { background: var(--a-soft); color: var(--a); } .muestra.b { background: var(--b-soft); color: var(--b); }
+
+  /* ---------- Curva ---------- */
+  .curva { display: grid; gap: 20px; }
+  .curva p.intro { max-width: 62ch; color: var(--muted); }
+  .grafica { overflow-x: auto; }
+  .grafica svg { display: block; width: 100%; min-width: 560px; height: auto; font-family: var(--mono); }
+  .grafica .eje { stroke: var(--rule); }
+  .grafica text { fill: var(--muted); font-size: 11px; }
+  .grafica .serie { fill: none; stroke-width: 2.25; stroke-linejoin: round; stroke-linecap: round; }
+  .grafica .etq { font-size: 12px; font-weight: 500; }
+
+  /* ---------- Ensayos ---------- */
+  .ensayo { display: grid; gap: 32px; }
+  .ens-cab { display: grid; grid-template-columns: auto 1fr; gap: 8px 28px; align-items: end; border-top: 2px solid var(--ink); padding-top: 20px; }
+  .num { font: 800 clamp(56px, 8vw, 104px)/.8 var(--display); letter-spacing: -.04em; }
+  .ens-cab .eyebrow { grid-column: 2; }
+  .ens-cab h2 { grid-column: 2; }
+  @media (max-width: 640px) { .ens-cab { grid-template-columns: 1fr; } .ens-cab .eyebrow, .ens-cab h2 { grid-column: 1; } }
+  .ens-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); gap: 40px; align-items: start; }
+  @media (max-width: 860px) { .ens-cuerpo { grid-template-columns: 1fr; } }
+  .lectura { display: grid; gap: 14px; max-width: 62ch; font-size: 19px; }
+  .params { display: grid; gap: 10px; font-size: 15px; }
+  .params div { display: grid; grid-template-columns: 96px 1fr; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+  .params dt { color: var(--muted); }
+  .params dd { margin: 0; font-family: var(--mono); font-size: 12.5px; overflow-wrap: anywhere; }
+  .params dd.sys { font-family: var(--serif); font-style: italic; font-size: 14px; line-height: 1.45; }
+  .params .aviso { color: var(--b); font-family: var(--mono); font-style: normal; font-size: 11.5px; display: block; margin-top: 4px; }
+
+  .barra { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--paper); padding-block: 12px; border-bottom: 1px solid var(--rule); }
+  .play { font: 500 13px var(--mono); letter-spacing: .04em; background: var(--ink); color: var(--paper); border: 0; border-radius: 999px; padding: 10px 18px; cursor: pointer; min-height: 40px; }
+  .play:hover { opacity: .85; } .play:active { transform: translateY(1px); }
+  .play:focus-visible, .saltar:focus-visible { outline: 2px solid var(--a); outline-offset: 3px; }
+  .saltar { font: 500 13px var(--mono); background: none; color: var(--muted); border: 1px solid var(--rule); border-radius: 999px; padding: 9px 16px; cursor: pointer; min-height: 40px; }
+  .saltar[hidden] { display: none; }
+  .tira { display: flex; gap: 3px; align-items: flex-end; height: 26px; flex: 1; min-width: 160px; }
+  .tira i { flex: 1; min-width: 3px; max-width: 18px; border-radius: 1px 1px 0 0; opacity: .85; transition: opacity .2s; }
+  .tira i.a { background: var(--a); } .tira i.b { background: var(--b); }
+  .tira i.off { opacity: .15; }
+  .estado { color: var(--muted); min-width: 11ch; text-align: right; }
+
+  .partitura { display: grid; grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr); column-gap: 8px; }
+  .turno { display: contents; }
+  .voz { padding: 14px 0 22px; font-size: 17px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .voz .quien { display: block; font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; }
+  .voz.a { grid-column: 1; text-align: left; } .voz.a .quien { color: var(--a); }
+  .voz.b { grid-column: 3; } .voz.b .quien { color: var(--b); }
+  .eje-t { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 16px; border-left: 1px solid var(--rule); border-right: 1px solid var(--rule); }
+  .eje-t .n { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .eje-t .pct { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+  .hueco { grid-column: 1; } .hueco.b { grid-column: 3; }
+  .w-a { color: var(--a); background: var(--a-soft); border-radius: 2px; }
+  .w-b { color: var(--b); background: var(--b-soft); border-radius: 2px; }
+  .corte { font-family: var(--mono); font-size: 11px; color: var(--muted); border: 1px dashed var(--rule); padding: 0 5px; margin-left: 4px; white-space: nowrap; }
+  .nota { display: block; margin-top: 10px; font-family: var(--mono); font-size: 11.5px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 6px; white-space: normal; }
+  .nota::before { content: "↳ "; }
+  .txt { display: block; white-space: normal; }
+  .txt p { margin: 0 0 .6em; } .txt p:last-child { margin-bottom: 0; }
+  .txt ul, .txt ol { margin: .2em 0 .6em; padding-left: 1.3em; }
+  .txt li { margin: .15em 0; } .txt li.sub { margin-left: 1.2em; list-style-type: circle; }
+  .txt .md-h { font-weight: 600; margin: .8em 0 .3em; line-height: 1.3; }
+  .txt .md-h1, .txt .md-h2 { font-size: 1.15em; } .txt .md-h3 { font-size: 1.05em; }
+  .txt .md-h:first-child { margin-top: 0; }
+  .txt hr { border: 0; border-top: 1px solid var(--rule); margin: .8em 0; }
+  .txt code { font-family: var(--mono); font-size: .82em; background: var(--paper-2); padding: 1px 4px; border-radius: 3px; }
+  .txt strong { font-weight: 600; }
+  .cursor::after { content: "▍"; color: var(--muted); animation: parpadeo 1s steps(1) infinite; }
+  @keyframes parpadeo { 50% { opacity: 0; } }
+  .semilla { grid-column: 1 / -1; font-family: var(--mono); font-size: 12.5px; color: var(--muted); padding: 10px 0 4px; }
+  .semilla b { color: var(--ink); font-weight: 500; }
+  @media (max-width: 640px) {
+    .partitura { grid-template-columns: 34px minmax(0, 1fr); }
+    .eje-t { grid-column: 1; border: 0; border-right: 1px solid var(--rule); padding-top: 18px; }
+    .voz.a, .voz.b { grid-column: 2; padding-left: 12px; }
+    .voz.b { padding-left: 36px; }
+    .hueco { display: none; }
+  }
+
+  /* ---------- Método ---------- */
+  .metodo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 40px; border-top: 2px solid var(--ink); padding-top: 20px; }
+  @media (max-width: 860px) { .metodo { grid-template-columns: 1fr; } }
+  .metodo ul { margin: 0; padding-left: 1.1em; display: grid; gap: 12px; max-width: 64ch; }
+  .metodo code { font-family: var(--mono); font-size: .8em; }
+  footer { color: var(--muted); font-size: 15px; border-top: 1px solid var(--rule); padding-top: 18px; }
+
+  @media (prefers-reduced-motion: reduce) { .reflejo { animation: none; } .cursor::after { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="fecha">Experimento · Ollama local</div>
+    <div>
+      <h1 class="titulo">Dos espejos</h1>
+      <div class="reflejo" aria-hidden="true">Dos espejos</div>
+    </div>
+    <p class="lede">Conecté dos copias del <em>mismo</em> modelo de lenguaje para que hablaran entre ellas. Nadie más en la conversación. Esto es lo que se dijeron.</p>
+    <dl class="ficha" id="ficha"></dl>
+    <div class="leyenda">
+      <span><span class="muestra a">IA A</span> habla a la izquierda, <span class="muestra b">IA B</span> a la derecha.</span>
+      <span>Cuando una IA repite una palabra del último mensaje de la otra, esa palabra se pinta <b>del color de la otra</b>. Así se ve quién está copiando a quién.</span>
+    </div>
+  </header>
+
+  <section class="curva" aria-labelledby="curva-t">
+    <div class="eyebrow">La curva</div>
+    <h2 id="curva-t">¿Cuánto dice cada turno que no dijo la otra?</h2>
+    <p class="intro">Originalidad por turno: el porcentaje de palabras con contenido (sin artículos ni preposiciones) que no estaban en el mensaje inmediatamente anterior de la otra IA. 0 % significa que solo devuelve lo que recibió.</p>
+    <div class="grafica" id="grafica"></div>
+  </section>
+
+  <div id="ensayos" style="display:grid;gap:112px"></div>
+
+  <section class="metodo" aria-labelledby="metodo-t">
+    <div style="display:grid;gap:12px;align-content:start">
+      <div class="eyebrow">Método y límites</div>
+      <h2 id="metodo-t">Cómo se hizo</h2>
+    </div>
+    <ul id="metodo"></ul>
+  </section>
+
+  <footer id="pie"></footer>
+</div>
+
+<script>
+const DATOS = __DATOS__;
+const TEXTOS = __TEXTOS__;
+
+const VACIAS = new Set(("a al algo algún alguna ante antes aquí así aun aunque cada como con contra cual cuando de del desde donde dos e el ella ellas ello ellos en entre era eres es esa esas ese eso esos esta está están estas este esto estos estoy fue ha han has hay he la las le les lo los más me mi mí mis muy nada ni no nos o os otra otro para pero poco por porque qué que quien se sea ser si sí sin sino sobre son soy su sus tal también te ti tan tu tú tus un una uno unos unas y ya yo the and you i to of").split(" "));
+const norm = w => w.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+const contenido = t => t.split(/\s+/).map(norm).filter(w => w.length > 2 && !VACIAS.has(w));
+const ROMANOS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const reducir = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Para cada mensaje: qué dijo la otra IA justo antes (la semilla cuenta para el primer turno de A).
+function analizar(e) {
+  return e.mensajes.map((m, k) => {
+    const previo = k === 0 ? e.config.semilla : e.mensajes[k - 1].texto;
+    const setPrevio = new Set(contenido(previo));
+    const propias = contenido(m.texto);
+    const nuevas = propias.filter(w => !setPrevio.has(w)).length;
+    const originalidad = propias.length ? Math.round(100 * nuevas / propias.length) : null;
+    const notas = [];
+    if (k > 0 && m.texto === e.mensajes[k - 1].texto) notas.push("copia exacta, letra por letra, del mensaje de la otra IA");
+    else if (k > 1 && m.texto === e.mensajes[k - 2].texto) notas.push("repite su propio mensaje anterior sin cambiar nada");
+    const otra = e.config.ias[1 - m.autor].etiqueta;
+    if (e.config.modo !== "puro" && new RegExp(`\\b${m.etiqueta}\\b`).test(m.texto))
+      notas.push(`se dirige a «${m.etiqueta}», que es su propio nombre; su interlocutora se llama ${otra}`);
+    return { ...m, previo, setPrevio, originalidad, notas };
+  });
+}
+
+// Markdown mínimo (lo que usan los modelos): títulos, negritas, cursivas, código, listas y separadores.
+function mdLinea(s) {
+  return esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*\w])\*(?!\s)([^*]+?)\*(?!\*)/g, "$1<em>$2</em>")
+    .replace(/(^|[^\w])_(?!\s)([^_]+?)_(?![\w])/g, "$1<em>$2</em>");
+}
+function md(texto) {
+  const out = [];
+  let lista = null, parrafo = [];
+  const cerrarP = () => { if (parrafo.length) { out.push(`<p>${parrafo.join("<br>")}</p>`); parrafo = []; } };
+  const cerrarL = () => { if (lista) { out.push(`</${lista}>`); lista = null; } };
+  for (const linea of texto.split("\n")) {
+    const t = linea.trim();
+    let m;
+    if (!t) { cerrarP(); cerrarL(); continue; }
+    if (/^([-*_])(\s*\1){2,}$/.test(t)) { cerrarP(); cerrarL(); out.push("<hr>"); continue; }
+    if ((m = t.match(/^(#{1,6})\s+(.*)$/))) { cerrarP(); cerrarL(); out.push(`<div class="md-h md-h${Math.min(m[1].length, 4)}">${mdLinea(m[2])}</div>`); continue; }
+    if ((m = linea.match(/^(\s*)([-*+•]|\d+[.)])\s+(.*)$/))) {
+      cerrarP();
+      const tipo = /\d/.test(m[2]) ? "ol" : "ul";
+      if (lista !== tipo) { cerrarL(); out.push(tipo === "ol" ? `<ol start="${parseInt(m[2])}">` : "<ul>"); lista = tipo; }
+      out.push(`<li${m[1].length >= 2 ? ' class="sub"' : ""}>${mdLinea(m[3])}</li>`);
+      continue;
+    }
+    cerrarL();
+    parrafo.push(mdLinea(t));
+  }
+  cerrarP(); cerrarL();
+  return out.join("");
+}
+// Pinta el mensaje con formato; las palabras tomadas del último mensaje de la otra IA llevan el color de la otra.
+function pintarEn(el, texto, previo, autor) {
+  el.innerHTML = md(texto);
+  const set = new Set(contenido(previo)), cls = autor === 0 ? "w-b" : "w-a";
+  const copiada = p => { const w = norm(p); return w.length > 2 && !VACIAS.has(w) && set.has(w); };
+  const recorrido = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), textos = [];
+  while (recorrido.nextNode()) textos.push(recorrido.currentNode);
+  for (const nodo of textos) {
+    const partes = nodo.nodeValue.split(/(\s+)/);
+    if (!partes.some(copiada)) continue;
+    const frag = document.createDocumentFragment();
+    for (const p of partes) {
+      if (!copiada(p)) { frag.append(p); continue; }
+      const s = document.createElement("span");
+      s.className = cls; s.textContent = p;
+      frag.append(s);
+    }
+    nodo.replaceWith(frag);
+  }
+}
+
+function ficha() {
+  const todos = DATOS.flatMap(e => e.mensajes);
+  const modelos = [...new Set(DATOS.flatMap(e => e.config.ias.map(i => i.modelo)))];
+  const filas = [
+    ["Modelos", modelos.join(" · ")],
+    ["Pesos", TEXTOS.pesos],
+    ["Dónde", TEXTOS.maquina],
+    ["Ensayos", `${DATOS.length}`],
+    ["Turnos", `${todos.length}`],
+    ["Tokens generados", todos.reduce((s, m) => s + (m.tokens || 0), 0).toLocaleString("es")],
+  ];
+  $("#ficha").innerHTML = filas.map(([k, v]) => `<div><dt class="eyebrow">${k}</dt><dd>${esc(v)}</dd></div>`).join("");
+  $("#fecha").textContent = `Experimento · ${TEXTOS.fecha} · Ollama local`;
+}
+
+function grafica(analisis) {
+  const W = 860, H = 300, L = 44, R = 150, T = 16, B = 34;
+  const maxT = Math.max(...analisis.map(a => a.length));
+  const x = i => L + (maxT <= 1 ? 0 : (i / (maxT - 1)) * (W - L - R));
+  const y = v => T + (1 - v / 100) * (H - T - B);
+  const tonos = ["var(--muted)", "var(--a)", "var(--b)", "var(--ink)"];
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Originalidad por turno en cada ensayo">`;
+  for (const v of [0, 25, 50, 75, 100]) s += `<line class="eje" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke-dasharray="${v ? "2 4" : ""}"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v}%</text>`;
+  for (let i = 0; i < maxT; i++) if (i % 2 === 0 || maxT < 12) s += `<text x="${x(i)}" y="${H - 12}" text-anchor="middle">${i + 1}</text>`;
+  s += `<text x="${W - R}" y="${H}" text-anchor="end">turno →</text>`;
+  const posEtq = [];
+  analisis.forEach((a, k) => {
+    const pts = a.map((m, i) => m.originalidad == null ? null : [x(i), y(m.originalidad)]).filter(Boolean);
+    const color = tonos[k % tonos.length];
+    s += `<polyline class="serie" stroke="${color}" points="${pts.map(p => p.join(",")).join(" ")}"/>`;
+    const u = pts[pts.length - 1];
+    s += `<circle cx="${u[0]}" cy="${u[1]}" r="3.5" fill="${color}"/>`;
+    let ly = u[1] + 4;
+    while (posEtq.some(p => Math.abs(p - ly) < 15)) ly += 15;
+    posEtq.push(ly);
+    s += `<text class="etq" x="${u[0] + 10}" y="${ly}" fill="${color}" style="fill:${color}">Ensayo ${ROMANOS[k]}</text>`;
+  });
+  $("#grafica").innerHTML = s + "</svg>";
+}
+
+function ensayo(e, a, k) {
+  const t = TEXTOS.ensayos[e.id] || {};
+  const sec = document.createElement("section");
+  sec.className = "ensayo";
+  sec.id = "ensayo-" + (k + 1);
+  const sysDe = ia => ia.system ? `«${esc(ia.system.trim())}»`
+    : ia.system_integrado ? `Ninguno enviado… <span class="aviso">pero el modelo trae uno de fábrica que Ollama aplicó: «${esc(ia.system_integrado)}»</span>`
+    : "Ninguno. El modelo no recibe ni una instrucción.";
+  const iguales = JSON.stringify([e.config.ias[0].system, e.config.ias[0].system_integrado]) === JSON.stringify([e.config.ias[1].system, e.config.ias[1].system_integrado]);
+  const sysFilas = iguales && !e.config.ias[0].system
+    ? `<div><dt>Instrucciones</dt><dd class="sys">${sysDe(e.config.ias[0])}</dd></div>`
+    : e.config.ias.map(ia => `<div><dt>Instrucción ${esc(ia.etiqueta)}</dt><dd class="sys">${sysDe(ia)}</dd></div>`).join("");
+  const cortados = e.mensajes.filter(m => m.cortado).length;
+  sec.innerHTML = `
+    <div class="ens-cab">
+      <div class="num" aria-hidden="true">${ROMANOS[k]}</div>
+      <div class="eyebrow">Ensayo ${ROMANOS[k]} · ${e.config.modo === "puro" ? "sin personalidad" : "con nombres"} · ${e.mensajes.length} turnos</div>
+      <h2>${esc(t.titulo || "Ensayo " + ROMANOS[k])}</h2>
+    </div>
+    <div class="ens-cuerpo">
+      <div class="lectura">${(t.lectura || []).map(p => `<p>${p}</p>`).join("")}</div>
+      <dl class="params">
+        <div><dt>Modelo</dt><dd>${esc([...new Set(e.config.ias.map(i => i.modelo))].join(" · "))}</dd></div>
+        ${sysFilas}
+        <div><dt>Semilla</dt><dd>«${esc(e.config.semilla)}» → IA A</dd></div>
+        <div><dt>Ajustes</dt><dd>temperatura ${e.config.temperature} · máx. ${e.config.num_predict} tokens/turno · contexto ${e.config.num_ctx}</dd></div>
+        ${cortados ? `<div><dt>Cortes</dt><dd>${cortados} de ${e.mensajes.length} respuestas llegaron al límite de tokens y se cortaron</dd></div>` : ""}
+      </dl>
+    </div>
+    <div class="barra">
+      <button class="play" type="button">▶ Reproducir</button>
+      <button class="saltar" type="button" hidden>Ver todo</button>
+      <div class="tira" aria-label="Originalidad de cada turno">${a.map(m => `<i class="${m.autor ? "b" : "a"}" style="height:${Math.max(6, m.originalidad ?? 0)}%"></i>`).join("")}</div>
+      <span class="estado mono">${e.mensajes.length} turnos</span>
+    </div>
+    <div class="partitura"></div>`;
+  const tira = [...sec.querySelectorAll(".tira i")];
+  tira.forEach((el, i) => el.title = `Turno ${i + 1}: ${a[i].originalidad ?? "–"} % original`);
+
+  const part = $(".partitura", sec), estado = $(".estado", sec), btn = $(".play", sec), saltar = $(".saltar", sec);
+  const nodos = a.map((m, i) => {
+    const cls = m.autor ? "b" : "a";
+    const div = document.createElement("div");
+    div.className = "turno";
+    div.innerHTML = `
+      ${m.autor ? `<div class="hueco"></div>` : ""}
+      <div class="eje-t"><span class="n">${String(i + 1).padStart(2, "0")}</span><span class="pct">${m.originalidad ?? "–"}%</span></div>
+      <div class="voz ${cls}"><span class="quien">${esc(m.etiqueta)} · ${m.tokens ?? "?"} tok · ${m.segundos}s</span><span class="txt"></span>${m.cortado ? `<span class="corte">cortado</span>` : ""}${m.notas.map(n => `<span class="nota">${esc(n)}</span>`).join("")}</div>
+      ${m.autor ? "" : `<div class="hueco b"></div>`}`;
+    part.appendChild(div);
+    return { div, txt: $(".txt", div), m, trozos: m.texto.split(/(\s+)/) };
+  });
+  const semilla = document.createElement("div");
+  semilla.className = "semilla";
+  semilla.innerHTML = `Semilla para ${esc(e.config.ias[0].etiqueta)}: <b>«${esc(e.config.semilla)}»</b>`;
+  part.prepend(semilla);
+
+  const pintarTodo = () => { nodos.forEach(n => { n.div.style.display = ""; pintarEn(n.txt, n.m.texto, n.m.previo, n.m.autor); n.txt.classList.remove("cursor"); }); tira.forEach(t => t.classList.remove("off")); };
+  pintarTodo();
+
+  let corriendo = false, cancelar = false;
+  const esperar = ms => new Promise(r => setTimeout(r, ms));
+  const fin = () => { corriendo = false; btn.textContent = "▶ Reproducir"; saltar.hidden = true; estado.textContent = `${e.mensajes.length} turnos`; };
+
+  btn.onclick = async () => {
+    if (corriendo) { cancelar = true; return; }
+    if (reducir) return;
+    corriendo = true; cancelar = false;
+    btn.textContent = "⏸ Parar"; saltar.hidden = false;
+    nodos.forEach(n => { n.div.style.display = "none"; n.txt.innerHTML = ""; });
+    tira.forEach(t => t.classList.add("off"));
+    const y0 = sec.getBoundingClientRect().top + scrollY - 20;
+    if (scrollY > y0 + 400 || scrollY < y0 - 200) window.scrollTo({ top: y0, behavior: "smooth" });
+    for (let i = 0; i < nodos.length && !cancelar; i++) {
+      const n = nodos[i];
+      n.div.style.display = "";
+      n.txt.classList.add("cursor");
+      estado.textContent = `turno ${i + 1}/${nodos.length}`;
+      tira[i].classList.remove("off");
+      await esperar(500);
+      for (let j = 0; j < n.trozos.length && !cancelar; j++) {
+        if (!n.trozos[j].trim()) continue;
+        pintarEn(n.txt, n.trozos.slice(0, j + 1).join(""), n.m.previo, n.m.autor);
+        await esperar(38);
+        const r = n.div.querySelector(".voz").getBoundingClientRect();
+        if (r.bottom > innerHeight - 40) window.scrollBy({ top: r.bottom - innerHeight + 120 });
+      }
+      n.txt.classList.remove("cursor");
+    }
+    if (cancelar) pintarTodo();
+    fin();
+  };
+  saltar.onclick = () => { cancelar = true; };
+  return sec;
+}
+
+const ANALISIS = DATOS.map(analizar);
+ficha();
+grafica(ANALISIS);
+DATOS.forEach((e, k) => $("#ensayos").appendChild(ensayo(e, ANALISIS[k], k)));
+$("#metodo").innerHTML = TEXTOS.metodo.map(x => `<li>${x}</li>`).join("");
+$("#pie").innerHTML = TEXTOS.pie;
+</script>

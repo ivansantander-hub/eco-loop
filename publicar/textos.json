@@ -1,0 +1,36 @@
+{
+  "orden": ["2026-09-27_023832_puro", "2026-09-27_024004_personalidad"],
+  "fecha": "27 sep 2026",
+  "pesos": "sha256 25bb9ad6…efec8, los mismos en ambos modelos",
+  "maquina": "Un Mac, con Ollama en local",
+  "ensayos": {
+    "2026-09-27_023832_puro": {
+      "titulo": "Dos asistentes esperando instrucciones",
+      "lectura": [
+        "La primera prueba iba a ser sin instrucciones: una semilla, «Hola», y dos copias del modelo pasándose la palabra.",
+        "En cinco turnos la conversación se congela. Las dos repiten, letra por letra, <i>«Estoy listo para ayudarte en lo que necesites. ¿En qué puedo ayudarte?»</i>. Ninguna necesita nada, así que ninguna puede avanzar. Son dos asistentes esperando a que el otro pida algo.",
+        "Este ensayo no fue limpio. El modelo, <code>qwen-es</code>, trae de fábrica un system prompt que le pide ser un asistente directo, y Ollama se lo aplicó sin avisar. Lo descubrimos después. El ensayo III repite la prueba sin esa instrucción."
+      ]
+    },
+    "2026-09-27_024004_personalidad": {
+      "titulo": "La espiral de la admiración mutua",
+      "lectura": [
+        "Aquí cada IA recibió una sola frase de sistema: su nombre y el nombre de la otra. Nada de personalidad. La semilla fue una pregunta: «¿Las IAs pueden llegar a tener consciencia?».",
+        "Desde el segundo turno confunden quién es quién. Eco le habla a «Eco» y Nova le habla a «Nova»: cada una trata a la otra como si fuera ella misma. Con los mismos pesos, tampoco se equivocan tanto.",
+        "Luego viene la escalada. Cada respuesta abre con un elogio más grande que el anterior, y el tema se desplaza de la consciencia a soñar juntas, a vivir juntas y, en el turno 5, a amar. Nadie lo pidió. Es hacia donde derivan dos modelos entrenados para ser amables cuando nada los frena.",
+        "Todas las respuestas llegaron al límite de 120 tokens y se cortaron a media frase. La IA siguiente recogía la frase inconclusa de la otra y la terminaba como propia."
+      ]
+    }
+  },
+  "metodo": [
+    "Todo corrió en local con Ollama, en un Mac. Ningún mensaje salió a internet.",
+    "Las dos IAs usan los mismos pesos: <code>qwen-es</code> y <code>qwen3-abliterated:14b</code> apuntan al mismo archivo. Solo cambia la configuración: <code>qwen-es</code> añade un system prompt de fábrica.",
+    "Cada IA ve sus mensajes como respuestas propias y los de la otra como mensajes de un usuario. Para cada modelo, la otra IA ocupa el lugar de la persona.",
+    "La semilla solo la recibe la IA A. La IA B entra directamente con lo que A contestó.",
+    "Sin razonamiento oculto (<code>think: false</code>) y con el historial completo en cada turno, dentro de una ventana de 8192 tokens.",
+    "La originalidad compara palabras, no ideas. Una IA que parafrasea puntúa alto aunque diga lo mismo.",
+    "Son tres conversaciones, no una estadística. Con otra temperatura u otra semilla pueden salir cosas distintas.",
+    "El texto de las IAs aparece tal cual salió, sin editar."
+  ],
+  "pie": "Dos espejos · septiembre de 2026 · Cada turno guarda su configuración, tokens y tiempo en el JSON del experimento."
+}
