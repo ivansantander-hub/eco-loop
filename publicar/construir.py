@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Genera 'Dos espejos.html' a partir de plantilla.html, textos.json y ../experimentos/*.json."""
+"""Genera 'eco-loop.html' a partir de plantilla.html, textos.json y ../experimentos/*.json."""
 import json, urllib.request
 from pathlib import Path
 
@@ -26,5 +26,5 @@ textos = json.loads((AQUI / "textos.json").read_text())
 html = (AQUI / "plantilla.html").read_text()
 js = lambda o: json.dumps(o, ensure_ascii=False).replace("</", "<\\/")
 html = html.replace("__DATOS__", js(datos)).replace("__TEXTOS__", js(textos))
-(AQUI / "Dos espejos.html").write_text(html)
+(AQUI / "eco-loop.html").write_text(html)
 print("ok", len(html) // 1024, "KB")

@@ -137,6 +137,6 @@ Otras herramientas:
 | `python3 charla.py "tema" -t 20` | Conversación en la terminal (solo Ollama) |
 | `python3 herramientas/bateria.py` | Batería de ensayos comparativos en OpenRouter |
 | `python3 herramientas/analizar.py` | Tabla con las medidas de todos tus ensayos |
-| `python3 publicar/construir.py` | Página pública *Dos espejos* con los ensayos marcados |
+| `python3 publicar/construir.py` | Página pública de eco loop con los ensayos marcados |
 
 La clave de OpenRouter se queda en `.env`, fuera del repositorio, y nunca llega al navegador. Arquitectura, formato de datos, medidas y seguridad: [`docs/tecnico.md`](docs/tecnico.md).

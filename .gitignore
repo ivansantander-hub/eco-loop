@@ -14,7 +14,7 @@ experimentos/*
 !experimentos/2026-09-27_024454_puro.md
 
 # Página generada: se reconstruye con `python3 publicar/construir.py`
-publicar/Dos espejos.html
+publicar/eco-loop.html
 
 # Claves locales (nunca al repo)
 .env

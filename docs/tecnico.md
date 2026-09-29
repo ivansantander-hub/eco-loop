@@ -131,7 +131,7 @@ Limitación: la originalidad compara palabras, no ideas. Una paráfrasis puntúa
 | `python3 charla.py "tema" -t 20` | Conversación en la terminal, solo Ollama |
 | `python3 herramientas/bateria.py` | Lanza en paralelo la batería de ensayos de OpenRouter definida en el script (necesita el servidor en marcha) |
 | `python3 herramientas/analizar.py [filtro]` | Tabla Markdown con las medidas de todos los ensayos |
-| `python3 publicar/construir.py` | Genera `publicar/Dos espejos.html` con los ensayos marcados como «En la página pública» |
+| `python3 publicar/construir.py` | Genera `publicar/eco-loop.html` con los ensayos marcados como «En la página pública» |
 
 ## Seguridad
 

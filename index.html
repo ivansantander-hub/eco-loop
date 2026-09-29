@@ -508,7 +508,7 @@ function renderTira() {
       <span class="sem"></span>
       <span class="meta">${NOMBRE_MODO[e.modo] || esc(e.modo)} · ${e.mensajes.length} mensajes · ${fechaDe(e.id)}${enBucle ? ` · <span class="bucle">en bucle</span>` : ""}</span>
       <span class="mini" aria-label="Originalidad de cada mensaje">${origs.map((o, k) => `<i class="${e.mensajes[k].autor ? "b" : "a"}" style="height:${Math.max(6, o ?? 0)}%"></i>`).join("")}</span>
-      <label class="pub" title="Incluir este ensayo al generar la página Dos espejos"><input type="checkbox" ${e.publicar ? "checked" : ""}> En la página pública</label>`;
+      <label class="pub" title="Incluir este ensayo al generar la página pública de eco loop"><input type="checkbox" ${e.publicar ? "checked" : ""}> En la página pública</label>`;
     b.querySelector(".sem").textContent = "«" + (e.semilla || "…") + "»";
     b.onclick = ev => { if (!ev.target.closest("label")) abrir(e.id); };
     b.onkeydown = ev => { if (ev.key === "Enter") abrir(e.id); };
