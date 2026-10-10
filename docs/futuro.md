@@ -1,6 +1,6 @@
 # Ideas para el futuro
 
-El proyecto queda en pausa con dos laboratorios cerrados: [01 · Espejos](../laboratorios/01-espejos/bitacora.md) y [02 · Máscaras](../laboratorios/02-mascaras/bitacora.md). Aquí queda apuntado lo que se podría hacer después, con el porqué y cómo encajaría en la arquitectura actual (ver [`tecnico.md`](tecnico.md)). Lo que otros ya investigaron sobre estas ideas está en [`relacionados.md`](relacionados.md).
+El proyecto está finalizado (octubre 2026), con dos laboratorios cerrados: [01 · Espejos](../laboratorios/01-espejos/bitacora.md) y [02 · Máscaras](../laboratorios/02-mascaras/bitacora.md). Aquí queda apuntado lo que se podría hacer después, con el porqué y cómo encajaría en la arquitectura actual (ver [`tecnico.md`](tecnico.md)). Lo que otros ya investigaron sobre estas ideas está en [`relacionados.md`](relacionados.md).
 
 Cada idea indica qué haría falta programar:
 

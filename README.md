@@ -4,6 +4,8 @@
 
 eco loop es un conjunto de **laboratorios** para averiguarlo. Cada laboratorio hace una pregunta, la pone a prueba con ensayos (dos modelos de lenguaje conversando, a veces dos copias del mismo) y guarda su bitácora. Funciona con modelos locales de [Ollama](https://ollama.com) y con cualquier modelo de [OpenRouter](https://openrouter.ai).
 
+> **Proyecto finalizado (octubre 2026).** Dos laboratorios cerrados, 210 ensayos, 2853 mensajes, 7 modelos y unos 1,03 US$ en total. El código sigue funcionando para repetir los ensayos o abrir un laboratorio nuevo.
+
 ## Laboratorios
 
 | # | Laboratorio | Pregunta | Estado | Bitácora |
@@ -33,9 +35,9 @@ Cada laboratorio vive en `laboratorios/<id>/`: su definición (`lab.json`), su b
 
 Cada trabajo, con lo que encontró y cómo lo comprobamos: [`docs/relacionados.md`](https://github.com/ivansantander-hub/eco-loop/blob/main/docs/relacionados.md).
 
-**Próximos laboratorios:** el formato de **guion** (sin roles de chat), un **moderador** que intervenga (la memoria ya está lista), la temperatura, y buscar semillas que funcionen mejor que el sueño.
+**Próximos laboratorios, si se retoma:** el formato de **guion** (sin roles de chat), un **moderador** que intervenga (la memoria ya está lista), la temperatura, y buscar semillas que funcionen mejor que el sueño.
 
-El proyecto queda en pausa aquí. Las ideas para seguir están en [`docs/futuro.md`](docs/futuro.md): aplicaciones útiles (clientes sintéticos para probar asistentes, si dos IAs deciden mejor que una, un banco de pruebas de modelos), otros laboratorios y las mejoras técnicas pendientes.
+El proyecto termina aquí. Las ideas para quien quiera seguir están en [`docs/futuro.md`](docs/futuro.md): aplicaciones útiles (clientes sintéticos para probar asistentes, si dos IAs deciden mejor que una, un banco de pruebas de modelos), otros laboratorios y las mejoras técnicas pendientes.
 
 ---
 
