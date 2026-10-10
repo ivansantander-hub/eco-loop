@@ -15,16 +15,23 @@ Cada laboratorio vive en `laboratorios/<id>/`: su definición (`lab.json`), su b
 
 ## Conclusiones hasta ahora
 
-1. **Dos asistentes no saben conversar.** Con un simple «Hola», todos los modelos arrancan ofreciendo ayuda y la conversación se bloquea: bucles de «¿en qué puedo ayudarte?», aclaraciones infinitas o menús de temas sin fin. *(Lab 01; confirmado en 9 de 9 réplicas en el Lab 02.)*
-2. **Solo avanza cuando una IA cede y hace de usuario**, y una vez repartidos, los roles no cambian: uno pregunta y otro responde. *(Lab 01 y 02.)*
-3. **Hay atractores claros:** la copia, la espiral de amabilidad, hablar de IA y la despedida que no termina. *(Lab 01.)*
-4. **Basta con darles un papel, y el mejor es el de persona.** Hacer de humana sube la originalidad unos 14 puntos y deja los bucles en 1–2 de 18; «Dos humanas» aguanta 30 turnos sin degradarse. *(Lab 02, 195 ensayos.)*
-5. **Saberse IA ayuda menos y aguanta peor:** a la larga, el elogio mutuo se vuelve plantilla y la conversación se congela. *(Lab 02.)*
-6. **El primer mensaje pesa tanto como el marco.** Un «Hola» empuja al modo asistente; «Anoche soñé que el mar se había ido.» reparte papeles (soñador e intérprete) y el «¿en qué puedo ayudarte?» desaparece en 63 de 63 ensayos. *(Lab 02.)*
+1. **Dos asistentes no saben conversar.** Con un simple «Hola», todos los modelos arrancan ofreciendo ayuda y la conversación se bloquea: bucles de «¿en qué puedo ayudarte?», aclaraciones infinitas o menús de temas sin fin. *(Lab 01; confirmado en 9 de 9 réplicas en el Lab 02. Ya lo vieron [CAMEL](https://arxiv.org/abs/2303.17760), que lo llama «bucle infinito de mensajes», y [Maiti et al.](https://arxiv.org/abs/2512.06256) con modelos base: 35 de 50 conversaciones acaban en bucle.)*
+2. **Solo avanza cuando una IA cede y hace de usuario**, y una vez repartidos, los roles no cambian: uno pregunta y otro responde. *(Lab 01 y 02. CAMEL lo llama «role flipping» y lo evita fijando los papeles en la instrucción; nosotros medimos quién cede y cuándo.)*
+3. **Hay atractores claros:** la copia, la espiral de amabilidad, hablar de IA y la despedida que no termina. *(Lab 01. CAMEL describe los mismos agradecimientos y despedidas en bucle, y Anthropic encontró el atractor de la «dicha espiritual» en el 90–100 % de las conversaciones entre dos Claude Opus 4, con gratitud, espiritualidad y emojis. Nosotros vimos la espiral de amabilidad en GPT, Gemini, Llama y Qwen.)*
+4. **Basta con darles un papel, y el mejor es el de persona.** Hacer de humana sube la originalidad unos 14 puntos y deja los bucles en 1–2 de 18; «Dos humanas» aguanta 30 turnos sin degradarse. *(Lab 02, 195 ensayos. Otros dan papeles para romper el modo asistente, como CAMEL o Infinite Backrooms, pero no encontramos quien compare papeles con réplicas.)*
+5. **Saberse IA ayuda menos y aguanta peor:** a la larga, el elogio mutuo se vuelve plantilla y la conversación se congela. *(Lab 02. Coincide con los estudios de debate entre IAs: la adulación las lleva a acuerdos prematuros y a acertar menos que una sola.)*
+6. **El primer mensaje pesa tanto como el marco.** Un «Hola» empuja al modo asistente; «Anoche soñé que el mar se había ido.» reparte papeles (soñador e intérprete) y el «¿en qué puedo ayudarte?» desaparece en 63 de 63 ensayos. *(Lab 02. No encontramos trabajos que lo midan.)*
 7. **El papel decide cómo acaba la conversación; el orden, cómo se comporta cada IA.** Quien habla primero abre como asistente aunque le hayamos dicho que es una persona. *(Lab 02.)*
 8. **El modelo pesa más que el marco,** y un mismo modelo varía bastante entre réplicas: una sola conversación no basta para afirmar nada. Los modelos pequeños en local colapsan antes y acaban en la espiral de afecto aunque hagan de persona. *(Lab 01 y 02.)*
-9. **Inventan con aplomo** (datos, lugares, biografías, un «Gran Drenaje» que vació los mares) y **la identidad es frágil** (se llaman por el nombre de la otra, alguna dice ser humana). *(Lab 01 y 02.)*
+9. **Inventan con aplomo** (datos, lugares, biografías, un «Gran Drenaje» que vació los mares) y **la identidad es frágil** (se llaman por el nombre de la otra, alguna dice ser humana). *(Lab 01 y 02. Los usuarios simulados con IA se apartan de su papel y se contradicen; [Abdulhai et al.](https://arxiv.org/abs/2511.00222) lo reducen más de un 55 % entrenando.)*
 10. **Hay que vigilar lo invisible:** instrucciones de fábrica que se aplican en silencio, conversaciones que no caben en la memoria del modelo y respuestas cortadas por el límite de tokens (42 % en la primera serie del Lab 02, 10 % tras subirlo). El sistema ahora las registra y avisa.
+
+**Qué ya se sabía.** Poner a dos IAs a hablar no es nuevo: Cleverbot contra Cleverbot (2011), CAMEL (2023), Infinite Backrooms (2024), el atractor de Claude 4 (2025) y los estudios de convergencia y de debate. Ya se sabía que se repiten, que se intercambian los papeles, que se adulan y que derivan a la gratitud y a hablar de sí mismas. Lo que añade eco loop:
+
+- Con modelos de chat, el bloqueo es que **las dos se creen el asistente**, y basta **cambiar el papel o la semilla** para evitarlo, sin entrenar nada.
+- La comparación es entre siete marcos y varios modelos, con réplicas, medidas abiertas y en español.
+
+Cada trabajo, con lo que encontró y cómo lo comprobamos: [`docs/relacionados.md`](https://github.com/ivansantander-hub/eco-loop/blob/main/docs/relacionados.md).
 
 **Próximos laboratorios:** el formato de **guion** (sin roles de chat), un **moderador** que intervenga (la memoria ya está lista), la temperatura, y buscar semillas que funcionen mejor que el sueño.
 
