@@ -1,6 +1,6 @@
 # Ideas para el futuro
 
-El proyecto queda en pausa con dos laboratorios cerrados: [01 · Espejos](../laboratorios/01-espejos/bitacora.md) y [02 · Máscaras](../laboratorios/02-mascaras/bitacora.md). Aquí queda apuntado lo que se podría hacer después, con el porqué y cómo encajaría en la arquitectura actual (ver [`tecnico.md`](tecnico.md)).
+El proyecto queda en pausa con dos laboratorios cerrados: [01 · Espejos](../laboratorios/01-espejos/bitacora.md) y [02 · Máscaras](../laboratorios/02-mascaras/bitacora.md). Aquí queda apuntado lo que se podría hacer después, con el porqué y cómo encajaría en la arquitectura actual (ver [`tecnico.md`](tecnico.md)). Lo que otros ya investigaron sobre estas ideas está en [`relacionados.md`](relacionados.md).
 
 Cada idea indica qué haría falta programar:
 
@@ -22,6 +22,7 @@ Quien construye un chatbot (soporte, ventas, un tutor) necesita probarlo con usu
 - **Pregunta de investigación:** ¿los clientes sintéticos encuentran los mismos fallos que encontraría una persona? ¿Cuántos hacen falta?
 - **Encaje:** marcos nuevos de «cliente» en `marcos.json`, con perfil y objetivo. La IA B sería el asistente a probar, con su system prompt. Harían falta medidas nuevas: ¿se resolvió el objetivo del cliente? ¿se violó alguna regla del asistente? Es **más trabajo**, sobre todo por las medidas y el informe orientado a fallos.
 - **Aplicaciones directas:** probar un asistente para Learup o las conversaciones de los avatares del otro proyecto.
+- **Antecedente:** [Abdulhai et al. (2025)](https://arxiv.org/abs/2511.00222) muestran que los usuarios simulados se salen del papel, y lo corrigen entrenando. Aquí se probaría a corregirlo solo con el marco y la semilla.
 
 ### ¿Dos IAs deciden mejor que una?
 
@@ -30,6 +31,7 @@ Muchos sistemas ponen a dos agentes a debatir para mejorar una respuesta. Pero e
 - **Qué haría:** preguntas con respuesta verificable (lógica, cálculo, datos, casos con trampa). Se compara una IA sola, dos IAs que debaten y dos IAs con papeles distintos (autora y revisora escéptica).
 - **Pregunta:** ¿debatir mejora el acierto, o una contagia su error a la otra?
 - **Encaje:** un formato con «tarea» y medidas de acierto contra la respuesta correcta. Es **más trabajo**.
+- **Ojo:** ya está bastante estudiado (Peacemaker or Troublemaker, Talk Isn't Always Cheap, CONSENSAGENT; ver [`relacionados.md`](relacionados.md#debatir-no-garantiza-acertar-la-adulación-entre-ias)). La adulación lleva a acuerdos prematuros. Si se hace, debería partir de ahí y aportar algo propio, por ejemplo los papeles del Lab 02.
 
 ### Banco de pruebas de modelos para agentes
 
